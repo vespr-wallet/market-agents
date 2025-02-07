@@ -1,3 +1,12 @@
+"""
+FastAPI service that integrates CrewAI with Masumi payment system.
+This service allows users to:
+1. Submit AI tasks that require payment
+2. Process payments using the Masumi payment system
+3. Execute CrewAI tasks once payment is confirmed
+4. Check status of jobs and payments
+"""
+
 from fastapi import FastAPI, HTTPException
 import uuid
 import json
@@ -11,23 +20,36 @@ from masumi_crewai.payment import Payment, Amount
 
 load_dotenv(find_dotenv(), override=True)
 
-app = FastAPI()
+app = FastAPI(
+    title="CrewAI Payment Service",
+    description="Service for running CrewAI tasks with Masumi payment integration",
+    version="1.0.0"
+)
 
-# Storage setup
+# Storage setup for job results
 RESULTS_DIR = "job_results"
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
-# Track state
+# In-memory storage for jobs and payments
 jobs: Dict[str, Dict[str, str]] = {}
 payments: Dict[str, Payment] = {}
 
-# Initialize config once
+# Initialize Masumi payment config
 config = Config(
     payment_service_url=os.getenv('PAYMENT_SERVICE_URL'),
     payment_api_key=os.getenv('PAYMENT_API_KEY')
 )
 
 async def execute_crew_task(input_data: str) -> str:
+    """
+    Execute a CrewAI task with researcher and writer agents.
+    
+    Args:
+        input_data: The research query or task description
+        
+    Returns:
+        str: The final result from the CrewAI agents
+    """
     researcher = Agent(
         role='Research Analyst',
         goal='Find and analyze key information',
@@ -51,6 +73,13 @@ async def execute_crew_task(input_data: str) -> str:
     return str(crew.kickoff())
 
 async def handle_payment_status(job_id: str, status: Dict) -> None:
+    """
+    Handle payment status updates and trigger job execution when payment is confirmed.
+    
+    Args:
+        job_id: Unique identifier for the job
+        status: Payment status response from Masumi
+    """
     payment_status = status.get("data", {}).get("status")
     jobs[job_id]["payment_status"] = payment_status
     
@@ -84,6 +113,21 @@ async def handle_payment_status(job_id: str, status: Dict) -> None:
 
 @app.post("/start_job")
 async def start_job(request: dict):
+    """
+    Start a new job by creating a payment request.
+    
+    Request body:
+        {
+            "input_data": "The task description or query"
+        }
+    
+    Returns:
+        dict: Job and payment information including:
+            - job_id: Unique identifier for the job
+            - payment_id: Masumi payment identifier
+            - status: Current job status
+            - submitResultTime: Deadline for job completion
+    """
     if "input_data" not in request:
         raise HTTPException(status_code=400, detail="input_data is required")
         
@@ -128,6 +172,20 @@ async def start_job(request: dict):
 
 @app.get("/status")
 async def get_status(job_id: str):
+    """
+    Get the current status of a job.
+    
+    Args:
+        job_id: The unique identifier of the job
+        
+    Returns:
+        dict: Current job status including:
+            - job_id: Unique identifier for the job
+            - payment_id: Masumi payment identifier
+            - status: Current job status
+            - payment_status: Current payment status
+            - result: Job result if completed
+    """
     if job_id not in jobs:
         raise HTTPException(status_code=404, detail="Job not found")
     

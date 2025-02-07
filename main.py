@@ -55,7 +55,7 @@ class JobRequest(BaseModel):
 class JobResponse(BaseModel):
     job_id: str
     payment_id: str
-    payment_address: str
+    status: str
 
 class JobStatus(BaseModel):
     job_id: str
@@ -136,33 +136,30 @@ async def handle_payment_status(job_id: str, status: Dict) -> None:
 
 @app.post("/start_job", response_model=JobResponse)
 async def start_job(job_request: JobRequest):
-    job_id = str(uuid.uuid4())
-    now = datetime.utcnow()
-    
-    logger.info(f"Starting new job with ID: {job_id}")
+    job_id_crew = str(uuid.uuid4())
+    agent_identifier = "dbd4d73c0910162da6bc6344ec5987175618dc42c36caa9b005ddb11a3ec9d6f"
+    logger.info(f"Starting new job with ID: {job_id_crew}")
     logger.info(f"Input data: {job_request.input_data}")
     
     try:
         # Initialize payment
         logger.info("Initializing payment...")
         payment = Payment(
-            agent_identifier=job_id,
-            amounts=[Amount(amount=5000000, unit="lovelace")],
+            agent_identifier=agent_identifier,
+            amounts=[Amount(amount=2000000, unit="lovelace")],
             config=config
         )
         
         # Create payment request
         logger.info("Creating payment request...")
         try:
-            deadline = (now + timedelta(hours=10)).isoformat() + "Z"
             # Log the request data
             logger.info("Payment request data:")
-            logger.info(f"- agent_identifier: {job_id}")
-            logger.info(f"- amounts: [{Amount(amount=5000000, unit='lovelace')}]")
-            logger.info(f"- deadline: {deadline}")
+            logger.info(f"- agent_identifier: {agent_identifier}")
+            logger.info(f"- amounts: [{Amount(amount=2000000, unit='lovelace')}]")
             logger.info(f"- payment_service_url: {config.payment_service_url}")
             
-            payment_request = await payment.create_payment_request(deadline)
+            payment_request = await payment.create_payment_request()
             logger.info(f"Payment request created: {payment_request}")
         except Exception as e:
             logger.error(f"Error creating payment request: {str(e)}")
@@ -173,18 +170,18 @@ async def start_job(job_request: JobRequest):
         
         # Store job info
         logger.info("Storing job information...")
-        jobs[job_id] = {
+        jobs[job_id_crew] = {
             "status": "pending_payment",
             "payment_status": "pending",
             "payment_id": payment_request['data']['identifier'],
             "input_data": job_request.input_data
         }
-        payments[job_id] = payment
+        payments[job_id_crew] = payment
         
         response = JobResponse(
-            job_id=job_id,
+            job_id=job_id_crew,
             payment_id=payment_request['data']['identifier'],
-            payment_address=payment_request['data']['payment_address']
+            status=payment_request['status']
         )
         logger.info(f"Returning response: {response}")
         return response

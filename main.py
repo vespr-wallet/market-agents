@@ -11,7 +11,6 @@ from fastapi import FastAPI, HTTPException
 import uuid
 import json
 import os
-from datetime import datetime
 from typing import Dict
 from crewai import Agent, Task, Crew
 from dotenv import load_dotenv, find_dotenv
@@ -83,144 +82,70 @@ async def execute_crew_task(input_data: str) -> str:
     )
     return str(crew.kickoff())
 
+@app.post("/start_job")
+async def start_job(request: dict):
+    job_id = str(uuid.uuid4())
+    agent_identifier = "dbd4d73c0910162da6bc6344ec5987175618dc42c36caa9b005ddb11a3ec9d6f"
+    
+    payment = Payment(
+        agent_identifier=agent_identifier,
+        amounts=[Amount(amount=2000000, unit="lovelace")],
+        config=config
+    )
+    
+    payment_request = await payment.create_payment_request()
+    payment_id = payment_request['data']['identifier']
+    
+    payment.payment_ids.add(payment_id)
+    
+    async def payment_callback(payment_id: str):
+        print(f"Callback triggered for payment {payment_id}")
+        await handle_payment_status(job_id, payment_id)
+    
+    payment_instances[job_id] = payment
+    await payment.start_status_monitoring(payment_callback)
+    
+    jobs[job_id] = {
+        "status": "pending_payment",
+        "payment_status": "pending",
+        "payment_id": payment_id,
+        "input_data": request["input_data"]
+    }
+    
+    print(f"Payment tracking started for ID: {payment_id}")
+    print(f"Current payment_ids in tracking: {payment.payment_ids}")
+    
+    return {
+        "job_id": job_id,
+        "payment_id": payment_id,
+        "status": payment_request['status'],
+        "submitResultTime": payment_request['submitResultTime']
+    }
+
 async def handle_payment_status(job_id: str, payment_id: str) -> None:
-    """
-    Handle payment status updates and trigger job execution when payment is confirmed.
-    """
-    print(f"Handling payment status for job {job_id} with payment {payment_id}")  # Debug log
+    result = await execute_crew_task(jobs[job_id]["input_data"])
+    print(f"Crew task completed for job {job_id}")
     
-    if job_id not in jobs or job_id not in payment_instances:
-        print(f"Job {job_id} not found in tracking")  # Debug log
-        return
-        
-    try:
-        result = await execute_crew_task(jobs[job_id]["input_data"])
-        print(f"Crew task completed for job {job_id}")  # Debug log
-        
-        await payment_instances[job_id].complete_payment(payment_id, result[:64])
-        print(f"Payment completed for job {job_id}")  # Debug log
-        
-        output = {
-            "result": result,
-            "status": "completed",
-            "payment_id": payment_id,
-            "payment_status": "completed"
-        }
-    except Exception as e:
-        print(f"Error processing job {job_id}: {str(e)}")  # Debug log
-        output = {
-            "error": str(e),
-            "status": "failed",
-            "payment_id": payment_id,
-            "payment_status": "failed"
-        }
+    await payment_instances[job_id].complete_payment(payment_id, result[:64])
+    print(f"Payment completed for job {job_id}")
     
-    # Save result and cleanup
+    output = {
+        "result": result,
+        "status": "completed",
+        "payment_id": payment_id,
+        "payment_status": "completed"
+    }
+    
     with open(os.path.join(RESULTS_DIR, f"{job_id}.json"), 'w') as f:
         json.dump(output, f)
     jobs[job_id]["status"] = output["status"]
     
-    # Cleanup payment instance
     if job_id in payment_instances:
         payment_instances[job_id].stop_status_monitoring()
         del payment_instances[job_id]
 
-@app.post("/start_job")
-async def start_job(request: dict):
-    """
-    Start a new job by creating a payment request.
-    
-    Request body:
-        {
-            "input_data": "The task description or query"
-        }
-    
-    Returns:
-        dict: Job and payment information including:
-            - job_id: Unique identifier for the job
-            - payment_id: Masumi payment identifier
-            - status: Current job status
-            - submitResultTime: Deadline for job completion
-    """
-    if "input_data" not in request:
-        raise HTTPException(status_code=400, detail="input_data is required")
-        
-    job_id = str(uuid.uuid4())
-    agent_identifier = "dbd4d73c0910162da6bc6344ec5987175618dc42c36caa9b005ddb11a3ec9d6f"
-    
-    try:
-        payment = Payment(
-            agent_identifier=agent_identifier,
-            amounts=[Amount(amount=2000000, unit="lovelace")],
-            config=config
-        )
-        
-        try:
-            # Create payment request first
-            payment_request = await payment.create_payment_request()
-            payment_id = payment_request['data']['identifier']
-            
-            # Store the payment ID in tracking set BEFORE starting monitoring
-            payment.payment_ids.add(payment_id)
-            
-            # Create async callback
-            async def payment_callback(payment_id: str):
-                print(f"Callback triggered for payment {payment_id}")
-                await handle_payment_status(job_id, payment_id)
-            
-            # Store instance and start monitoring
-            payment_instances[job_id] = payment
-            await payment.start_status_monitoring(payment_callback)
-            
-            # Store job info
-            jobs[job_id] = {
-                "status": "pending_payment",
-                "payment_status": "pending",
-                "payment_id": payment_id,
-                "input_data": request["input_data"]
-            }
-            
-            print(f"Payment tracking started for ID: {payment_id}")  # Debug log
-            print(f"Current payment_ids in tracking: {payment.payment_ids}")  # Debug log
-            
-            return {
-                "job_id": job_id,
-                "payment_id": payment_id,
-                "status": payment_request['status'],
-                "submitResultTime": payment_request['submitResultTime']
-            }
-            
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Failed to create payment request: {str(e)}"
-            )
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"An unexpected error occurred: {str(e)}"
-        )
-
 @app.get("/status")
 async def get_status(job_id: str):
-    """
-    Get the current status of a job.
-    
-    Args:
-        job_id: The unique identifier of the job
-        
-    Returns:
-        dict: Current job status including:
-            - job_id: Unique identifier for the job
-            - payment_id: Masumi payment identifier
-            - status: Current job status
-            - payment_status: Current payment status
-            - result: Job result if completed
-    """
-    if job_id not in jobs:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
     if job_id in payment_instances:
         status = await payment_instances[job_id].check_payment_status()
         jobs[job_id]["payment_status"] = status.get("data", {}).get("status")

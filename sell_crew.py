@@ -16,6 +16,7 @@ from crewai import Agent, Task, Crew
 from dotenv import load_dotenv, find_dotenv
 from masumi_crewai.config import Config
 from masumi_crewai.payment import Payment, Amount
+from crew_executor import CrewExecutor
 
 load_dotenv(find_dotenv(), override=True)
 
@@ -39,16 +40,8 @@ config = Config(
     payment_api_key=os.getenv('PAYMENT_API_KEY')
 )
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize any startup requirements"""
-    pass
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Clean up all monitoring tasks"""
-    for payment in payment_instances.values():
-        payment.stop_status_monitoring()
+# Initialize CrewExecutor
+crew_executor = CrewExecutor()
 
 async def execute_crew_task(input_data: str) -> str:
     """
@@ -60,27 +53,21 @@ async def execute_crew_task(input_data: str) -> str:
     Returns:
         str: The final result from the CrewAI agents
     """
-    researcher = Agent(
-        role='Research Analyst',
-        goal='Find and analyze key information',
-        backstory='Expert at extracting information',
-        verbose=True
-    )
-    writer = Agent(
-        role='Content Summarizer',
-        goal='Create clear summaries from research',
-        backstory='Skilled at transforming complex information',
-        verbose=True
-    )
-    
-    crew = Crew(
-        agents=[researcher, writer],
-        tasks=[
-            Task(description=f'Research: {input_data}', agent=researcher),
-            Task(description='Write summary', agent=writer)
+    return await crew_executor.execute_task(input_data)
+
+@app.get("/availability")
+async def check_availability():
+    return {
+        "status": "available"
+    }
+
+@app.get("/input_schema")
+async def get_input_schema():
+    return {
+        "input_data": [
+            { "key": "text", "value": "string" }
         ]
-    )
-    return str(crew.kickoff())
+    }
 
 @app.post("/start_job")
 async def start_job(request: dict):
@@ -95,31 +82,27 @@ async def start_job(request: dict):
     
     payment_request = await payment.create_payment_request()
     payment_id = payment_request['data']['identifier']
-    
     payment.payment_ids.add(payment_id)
     
     async def payment_callback(payment_id: str):
-        print(f"Callback triggered for payment {payment_id}")
         await handle_payment_status(job_id, payment_id)
     
     payment_instances[job_id] = payment
     await payment.start_status_monitoring(payment_callback)
     
+    # Convert simple key-value input to text
+    input_text = " ".join(f"{key}: {value}" for key, value in request.items())
+    
     jobs[job_id] = {
-        "status": "pending_payment",
+        "status": "awaiting payment",
         "payment_status": "pending",
         "payment_id": payment_id,
-        "input_data": request["input_data"]
+        "input_data": input_text
     }
-    
-    print(f"Payment tracking started for ID: {payment_id}")
-    print(f"Current payment_ids in tracking: {payment.payment_ids}")
     
     return {
         "job_id": job_id,
-        "payment_id": payment_id,
-        "status": payment_request['status'],
-        "submitResultTime": payment_request['submitResultTime']
+        "payment_id": payment_id
     }
 
 async def handle_payment_status(job_id: str, payment_id: str) -> None:
@@ -146,6 +129,9 @@ async def handle_payment_status(job_id: str, payment_id: str) -> None:
 
 @app.get("/status")
 async def get_status(job_id: str):
+    if job_id not in jobs:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
     if job_id in payment_instances:
         status = await payment_instances[job_id].check_payment_status()
         jobs[job_id]["payment_status"] = status.get("data", {}).get("status")
@@ -153,13 +139,16 @@ async def get_status(job_id: str):
     result_path = os.path.join(RESULTS_DIR, f"{job_id}.json")
     if os.path.exists(result_path):
         with open(result_path, 'r') as f:
-            return json.load(f)
+            data = json.load(f)
+            return {
+                "job_id": job_id,
+                "status": "completed",
+                "result": data["result"]
+            }
     
     return {
         "job_id": job_id,
-        "payment_id": jobs[job_id]["payment_id"],
-        "status": jobs[job_id]["status"],
-        "payment_status": jobs[job_id].get("payment_status", "unknown")
+        "status": jobs[job_id]["status"]
     }
 
 if __name__ == "__main__":

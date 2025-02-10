@@ -1,5 +1,4 @@
 from crewai import Agent, Task, Crew
-from typing import Optional
 
 class CrewExecutor:
     def __init__(self, verbose: bool = True):

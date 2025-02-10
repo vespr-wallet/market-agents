@@ -12,7 +12,6 @@ import uuid
 import json
 import os
 from typing import Dict
-from crewai import Agent, Task, Crew
 from dotenv import load_dotenv, find_dotenv
 from masumi_crewai.config import Config
 from masumi_crewai.payment import Payment, Amount
@@ -72,7 +71,7 @@ async def get_input_schema():
 @app.post("/start_job")
 async def start_job(request: dict):
     job_id = str(uuid.uuid4())
-    agent_identifier = "dbd4d73c0910162da6bc6344ec5987175618dc42c36caa9b005ddb11a3ec9d6f"
+    agent_identifier = "60d44b00e5a4f34867196160c22aa0308e710f13f9754d98f6ed6ad9180cc1c0c540d81b4983cf07306ed9e627f688f8ce4a5f88f12e00448765048e"
     
     payment = Payment(
         agent_identifier=agent_identifier,
@@ -81,7 +80,7 @@ async def start_job(request: dict):
     )
     
     payment_request = await payment.create_payment_request()
-    payment_id = payment_request['data']['identifier']
+    payment_id = payment_request['data']['blockchainIdentifier']
     payment.payment_ids.add(payment_id)
     
     async def payment_callback(payment_id: str):

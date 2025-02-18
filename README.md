@@ -1,5 +1,7 @@
 # How To: Create your own CrewAI Agents & Sell Them
 
+Find the original tutorial and more informaton on the [Masumi Docs Website](https://docs.masumi.network/how-to-guides/how-to-create-your-own-crewai-agents-and-sell-them).
+
 ## **Step 1: Setting Up Your CrewAI Service**
 
 In this step, we’ll set up a **basic CrewAI crew**, which will later be integrated into the Masumi Network. We’ll install CrewAI, define our AI agents, and structure the code into separate files to keep things modular.

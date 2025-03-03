@@ -59,13 +59,17 @@ async def execute_crew_task(input_data: str) -> str:
 async def start_job(data: StartJobRequest):
     """ Initiates a job and creates a payment request """
     job_id = str(uuid.uuid4())
-    agent_identifier = "dcdf2c533510e865e3d7e0f0e5537c7a176dd4dc1df69e83a703976b16a51f4536884829c1156cdb1110c1a70c0f97ff06036083f7e23a1346418517"
+    agent_identifier = "0520e542b4704586b7899e8af207501fd1cfb4d12fc419ede7986de814172d9a1284bbb58a82a82092ec8f682aa4040845472d81d759d246f5d18858"
 
+    # Define payment amounts
+    amounts = [Amount(amount="10000000", unit="lovelace")]  # 10 tADA as example
+    
     # Create a payment request using Masumi
     payment = Payment(
         agent_identifier=agent_identifier,
-        amounts=[Amount(amount="2000000", unit="lovelace")],  # 2 ADA as example
-        config=config
+        amounts=amounts,
+        config=config,
+        identifier_from_purchaser="example_identifier" # Set this to whatever you. Ideally randomly generate a new identifier for each purchase.
     )
     
     payment_request = await payment.create_payment_request()
@@ -88,10 +92,18 @@ async def start_job(data: StartJobRequest):
     payment_instances[job_id] = payment
     await payment.start_status_monitoring(payment_callback)
 
+    # Return the response in the required format
     return {
+        "status": "success",
         "job_id": job_id,
-        "payment_id": payment_id,
-        "status": "awaiting_payment"
+        "blockchainIdentifier": payment_request["data"]["blockchainIdentifier"],
+        "submitResultTime": payment_request["data"]["submitResultTime"],
+        "unlockTime": payment_request["data"]["unlockTime"],
+        "externalDisputeUnlockTime": payment_request["data"]["externalDisputeUnlockTime"],
+        "agentIdentifier": agent_identifier,
+        "sellerVkey": "07f2e319dc5796df95406dcce6322c54cd08a62cbc5ee6c579d4e0e6", # Get this seller_vkey from the GET /payment_source/ endpoint in the Masumi Payment Service.
+        "identifierFromPurchaser": "example_identifier",
+        "amounts": amounts
     }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -99,11 +111,22 @@ async def start_job(data: StartJobRequest):
 # ─────────────────────────────────────────────────────────────────────────────
 async def handle_payment_status(job_id: str, payment_id: str) -> None:
     """ Executes CrewAI task after payment confirmation """
+    print(f"Payment {payment_id} completed for job {job_id}, executing task...")
+    
+    # Update job status to running
+    jobs[job_id]["status"] = "running"
+    
+    # Execute the AI task
     result = await execute_crew_task(jobs[job_id]["input_data"])
     print(f"Crew task completed for job {job_id}")
 
+    # Convert result to string if it's not already
+    result_str = str(result)
+    
     # Mark payment as completed on Masumi
-    await payment_instances[job_id].complete_payment(payment_id, result[:64])
+    # Use a shorter string for the result hash
+    result_hash = result_str[:64] if len(result_str) >= 64 else result_str
+    await payment_instances[job_id].complete_payment(payment_id, result_hash)
     print(f"Payment completed for job {job_id}")
 
     # Update job status
@@ -112,6 +135,11 @@ async def handle_payment_status(job_id: str, payment_id: str) -> None:
     jobs[job_id]["result"] = result
 
     # Stop monitoring payment status
+    if job_id in payment_instances:
+        payment_instances[job_id].stop_status_monitoring()
+        del payment_instances[job_id]
+    
+    # Still stop monitoring to prevent repeated failures
     if job_id in payment_instances:
         payment_instances[job_id].stop_status_monitoring()
         del payment_instances[job_id]
@@ -127,7 +155,7 @@ async def get_status(job_id: str):
 
     job = jobs[job_id]
 
-    # Check latest payment status
+    # Check latest payment status if payment instance exists
     if job_id in payment_instances:
         status = await payment_instances[job_id].check_payment_status()
         job["payment_status"] = status.get("data", {}).get("status")

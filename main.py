@@ -196,9 +196,9 @@ async def input_schema():
     return schema_example
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5) Retrieve Input Schema (MIP-003: /input_schema)
+# 6) Health Check
 # ─────────────────────────────────────────────────────────────────────────────
-@app.get("/heath")
+@app.get("/health")
 async def health():
     """
     Returns the health of the server.

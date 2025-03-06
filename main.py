@@ -179,6 +179,35 @@ async def check_availability():
     }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 5) Retrieve Input Schema (MIP-003: /input_schema)
+# ─────────────────────────────────────────────────────────────────────────────
+@app.get("/input_schema")
+async def input_schema():
+    """
+    Returns the expected input schema for the /start_job endpoint.
+    Fulfills MIP-003 /input_schema endpoint.
+    """
+    # Example response defining the accepted key-value pairs
+    schema_example = {
+        "input_data": [
+            {"key": "text", "value": "string"}
+        ]
+    }
+    return schema_example
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5) Retrieve Input Schema (MIP-003: /input_schema)
+# ─────────────────────────────────────────────────────────────────────────────
+@app.get("/heath")
+async def health():
+    """
+    Returns the health of the server.
+    """
+    return {
+        "status": "healthy"
+    }
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Main Logic if Called as a Script
 # ─────────────────────────────────────────────────────────────────────────────
 def main():

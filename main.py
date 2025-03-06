@@ -218,6 +218,6 @@ if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "api":
         print("Starting FastAPI server with Masumi integration...")
-        uvicorn.run(app, host="0.0.0.0", port=8000)
+        uvicorn.run(app)
     else:
         main()

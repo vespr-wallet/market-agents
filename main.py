@@ -196,18 +196,6 @@ async def input_schema():
     return schema_example
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 6) Health Check
-# ─────────────────────────────────────────────────────────────────────────────
-@app.get("/health")
-async def health():
-    """
-    Returns the health of the server.
-    """
-    return {
-        "status": "healthy"
-    }
-
-# ─────────────────────────────────────────────────────────────────────────────
 # Main Logic if Called as a Script
 # ─────────────────────────────────────────────────────────────────────────────
 def main():
@@ -218,6 +206,6 @@ if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "api":
         print("Starting FastAPI server with Masumi integration...")
-        uvicorn.run(app)
+        uvicorn.run(app, host="0.0.0.0", port=8000)
     else:
         main()

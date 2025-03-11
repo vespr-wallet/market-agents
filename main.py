@@ -10,7 +10,7 @@ from masumi_crewai.payment import Payment, Amount
 from crew_definition import ResearchCrew
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 # Retrieve API Keys and URLs
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -59,17 +59,19 @@ async def execute_crew_task(input_data: str) -> str:
 async def start_job(data: StartJobRequest):
     """ Initiates a job and creates a payment request """
     job_id = str(uuid.uuid4())
-    agent_identifier = "da1995c45c5fe0f32cf609fb073e6ee7d213ba42a3457fc2f609350844cb0a3e4365c34c47231f1daa3ea67b800c6c2de0aeb12f5ba4c2c982dbcc79"
+    agent_identifier = os.getenv("AGENT_IDENTIFIER")
 
     # Define payment amounts
-    amounts = [Amount(amount="10000000", unit="lovelace")]  # 10 tADA as example
+    payment_amount = os.getenv("PAYMENT_AMOUNT", "10000000")  # Default 10 ADA
+    payment_unit = os.getenv("PAYMENT_UNIT", "lovelace") # Default lovelace
+    amounts = [Amount(amount=payment_amount, unit=payment_unit)]
     
     # Create a payment request using Masumi
     payment = Payment(
         agent_identifier=agent_identifier,
         amounts=amounts,
         config=config,
-        identifier_from_purchaser="example_identifier" # Set this to whatever you. Ideally randomly generate a new identifier for each purchase.
+        identifier_from_purchaser="default_purchaser_id" # Best practice: Replace with a random identifier for each purchase
     )
     
     payment_request = await payment.create_payment_request()
@@ -101,7 +103,7 @@ async def start_job(data: StartJobRequest):
         "unlockTime": payment_request["data"]["unlockTime"],
         "externalDisputeUnlockTime": payment_request["data"]["externalDisputeUnlockTime"],
         "agentIdentifier": agent_identifier,
-        "sellerVkey": "07f2e319dc5796df95406dcce6322c54cd08a62cbc5ee6c579d4e0e6", # Get this seller_vkey from the GET /payment_source/ endpoint in the Masumi Payment Service.
+        "sellerVkey": os.getenv("SELLER_VKEY"),
         "identifierFromPurchaser": "example_identifier",
         "amounts": amounts
     }

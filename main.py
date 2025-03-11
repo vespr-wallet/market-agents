@@ -59,7 +59,7 @@ async def execute_crew_task(input_data: str) -> str:
 async def start_job(data: StartJobRequest):
     """ Initiates a job and creates a payment request """
     job_id = str(uuid.uuid4())
-    agent_identifier = "0520e542b4704586b7899e8af207501fd1cfb4d12fc419ede7986de814172d9a1284bbb58a82a82092ec8f682aa4040845472d81d759d246f5d18858"
+    agent_identifier = "da1995c45c5fe0f32cf609fb073e6ee7d213ba42a3457fc2f609350844cb0a3e4365c34c47231f1daa3ea67b800c6c2de0aeb12f5ba4c2c982dbcc79"
 
     # Define payment amounts
     amounts = [Amount(amount="10000000", unit="lovelace")]  # 10 tADA as example

@@ -33,4 +33,15 @@ wheels/
 *.swo
 
 # Project specific
+job_results/
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific
 job_results/ 

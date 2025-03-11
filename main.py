@@ -8,6 +8,10 @@ from datetime import datetime, timezone
 from masumi_crewai.config import Config
 from masumi_crewai.payment import Payment, Amount
 from crew_definition import ResearchCrew
+from logging_config import setup_logging, get_logger
+
+# Configure logging
+logger = setup_logging()
 
 # Load environment variables
 load_dotenv(override=True)
@@ -16,6 +20,9 @@ load_dotenv(override=True)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PAYMENT_SERVICE_URL = os.getenv("PAYMENT_SERVICE_URL")
 PAYMENT_API_KEY = os.getenv("PAYMENT_API_KEY")
+
+logger.info("Starting application with configuration:")
+logger.info(f"PAYMENT_SERVICE_URL: {PAYMENT_SERVICE_URL}")
 
 # Initialize FastAPI
 app = FastAPI()
@@ -48,8 +55,10 @@ class ProvideInputRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 async def execute_crew_task(input_data: str) -> str:
     """ Execute a CrewAI task with Research and Writing Agents """
-    crew = ResearchCrew()
+    logger.info(f"Starting CrewAI task with input: {input_data[:50]}...")
+    crew = ResearchCrew(logger=logger)
     result = crew.crew.kickoff({"text": input_data})
+    logger.info("CrewAI task completed successfully")
     return result
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -60,11 +69,13 @@ async def start_job(data: StartJobRequest):
     """ Initiates a job and creates a payment request """
     job_id = str(uuid.uuid4())
     agent_identifier = os.getenv("AGENT_IDENTIFIER")
+    logger.info(f"Starting job {job_id} with agent {agent_identifier}")
 
     # Define payment amounts
     payment_amount = os.getenv("PAYMENT_AMOUNT", "10000000")  # Default 10 ADA
     payment_unit = os.getenv("PAYMENT_UNIT", "lovelace") # Default lovelace
     amounts = [Amount(amount=payment_amount, unit=payment_unit)]
+    logger.info(f"Using payment amount: {payment_amount} {payment_unit}")
     
     # Create a payment request using Masumi
     payment = Payment(
@@ -74,9 +85,11 @@ async def start_job(data: StartJobRequest):
         identifier_from_purchaser="default_purchaser_id" # Best practice: Replace with a random identifier for each purchase
     )
     
+    logger.info("Creating payment request...")
     payment_request = await payment.create_payment_request()
     payment_id = payment_request["data"]["blockchainIdentifier"]
     payment.payment_ids.add(payment_id)
+    logger.info(f"Created payment request with ID: {payment_id}")
 
     # Store job info (Awaiting payment)
     jobs[job_id] = {
@@ -92,6 +105,7 @@ async def start_job(data: StartJobRequest):
 
     # Start monitoring the payment status
     payment_instances[job_id] = payment
+    logger.info(f"Starting payment status monitoring for job {job_id}")
     await payment.start_status_monitoring(payment_callback)
 
     # Return the response in the required format
@@ -113,38 +127,43 @@ async def start_job(data: StartJobRequest):
 # ─────────────────────────────────────────────────────────────────────────────
 async def handle_payment_status(job_id: str, payment_id: str) -> None:
     """ Executes CrewAI task after payment confirmation """
-    print(f"Payment {payment_id} completed for job {job_id}, executing task...")
-    
-    # Update job status to running
-    jobs[job_id]["status"] = "running"
-    
-    # Execute the AI task
-    result = await execute_crew_task(jobs[job_id]["input_data"])
-    print(f"Crew task completed for job {job_id}")
+    try:
+        logger.info(f"Payment {payment_id} completed for job {job_id}, executing task...")
+        
+        # Update job status to running
+        jobs[job_id]["status"] = "running"
+        
+        # Execute the AI task
+        result = await execute_crew_task(jobs[job_id]["input_data"])
+        logger.info(f"Crew task completed for job {job_id}")
 
-    # Convert result to string if it's not already
-    result_str = str(result)
-    
-    # Mark payment as completed on Masumi
-    # Use a shorter string for the result hash
-    result_hash = result_str[:64] if len(result_str) >= 64 else result_str
-    await payment_instances[job_id].complete_payment(payment_id, result_hash)
-    print(f"Payment completed for job {job_id}")
+        # Convert result to string if it's not already
+        result_str = str(result)
+        
+        # Mark payment as completed on Masumi
+        # Use a shorter string for the result hash
+        result_hash = result_str[:64] if len(result_str) >= 64 else result_str
+        await payment_instances[job_id].complete_payment(payment_id, result_hash)
+        logger.info(f"Payment completed for job {job_id}")
 
-    # Update job status
-    jobs[job_id]["status"] = "completed"
-    jobs[job_id]["payment_status"] = "completed"
-    jobs[job_id]["result"] = result
+        # Update job status
+        jobs[job_id]["status"] = "completed"
+        jobs[job_id]["payment_status"] = "completed"
+        jobs[job_id]["result"] = result
 
-    # Stop monitoring payment status
-    if job_id in payment_instances:
-        payment_instances[job_id].stop_status_monitoring()
-        del payment_instances[job_id]
-    
-    # Still stop monitoring to prevent repeated failures
-    if job_id in payment_instances:
-        payment_instances[job_id].stop_status_monitoring()
-        del payment_instances[job_id]
+        # Stop monitoring payment status
+        if job_id in payment_instances:
+            payment_instances[job_id].stop_status_monitoring()
+            del payment_instances[job_id]
+    except Exception as e:
+        logger.error(f"Error processing payment {payment_id} for job {job_id}: {str(e)}", exc_info=True)
+        jobs[job_id]["status"] = "failed"
+        jobs[job_id]["error"] = str(e)
+        
+        # Still stop monitoring to prevent repeated failures
+        if job_id in payment_instances:
+            payment_instances[job_id].stop_status_monitoring()
+            del payment_instances[job_id]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3) Check Job and Payment Status (MIP-003: /status)
@@ -152,15 +171,25 @@ async def handle_payment_status(job_id: str, payment_id: str) -> None:
 @app.get("/status")
 async def get_status(job_id: str):
     """ Retrieves the current status of a specific job """
+    logger.info(f"Checking status for job {job_id}")
     if job_id not in jobs:
+        logger.warning(f"Job {job_id} not found")
         raise HTTPException(status_code=404, detail="Job not found")
 
     job = jobs[job_id]
 
     # Check latest payment status if payment instance exists
     if job_id in payment_instances:
-        status = await payment_instances[job_id].check_payment_status()
-        job["payment_status"] = status.get("data", {}).get("status")
+        try:
+            status = await payment_instances[job_id].check_payment_status()
+            job["payment_status"] = status.get("data", {}).get("status")
+            logger.info(f"Updated payment status for job {job_id}: {job['payment_status']}")
+        except ValueError as e:
+            logger.warning(f"Error checking payment status: {str(e)}")
+            job["payment_status"] = "unknown"
+        except Exception as e:
+            logger.error(f"Error checking payment status: {str(e)}", exc_info=True)
+            job["payment_status"] = "error"
 
     return {
         "job_id": job_id,

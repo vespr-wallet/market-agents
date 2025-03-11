@@ -1,11 +1,16 @@
 from crewai import Agent, Crew, Task
+import logging
 
 class ResearchCrew:
-    def __init__(self, verbose=True):
+    def __init__(self, verbose=True, logger=None):
         self.verbose = verbose
+        self.logger = logger or logging.getLogger(__name__)
         self.crew = self.create_crew()
+        self.logger.info("ResearchCrew initialized")
 
     def create_crew(self):
+        self.logger.info("Creating research crew with agents")
+        
         researcher = Agent(
             role='Research Analyst',
             goal='Find and analyze key information',
@@ -19,6 +24,8 @@ class ResearchCrew:
             backstory='Skilled at transforming complex information',
             verbose=self.verbose
         )
+
+        self.logger.info("Created research and writer agents")
 
         crew = Crew(
             agents=[researcher, writer],
@@ -35,4 +42,5 @@ class ResearchCrew:
                 )
             ]
         )
+        self.logger.info("Crew setup completed")
         return crew

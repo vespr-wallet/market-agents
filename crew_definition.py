@@ -1,10 +1,10 @@
 from crewai import Agent, Crew, Task
-import logging
+from logging_config import get_logger
 
 class ResearchCrew:
     def __init__(self, verbose=True, logger=None):
         self.verbose = verbose
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger or get_logger(__name__)
         self.crew = self.create_crew()
         self.logger.info("ResearchCrew initialized")
 

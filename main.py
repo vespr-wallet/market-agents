@@ -55,9 +55,9 @@ class ProvideInputRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 async def execute_crew_task(input_data: str) -> str:
     """ Execute a CrewAI task with Research and Writing Agents """
-    logger.info(f"Starting CrewAI task with input: {input_data[:50]}...")
+    logger.info(f"Starting CrewAI task with input: {input_data}")
     crew = ResearchCrew(logger=logger)
-    result = crew.crew.kickoff({"text": input_data})
+    result = crew.crew.kickoff(inputs={"text": input_data})
     logger.info("CrewAI task completed successfully")
     return result
 

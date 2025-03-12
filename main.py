@@ -69,6 +69,11 @@ async def start_job(data: StartJobRequest):
     """ Initiates a job and creates a payment request """
     job_id = str(uuid.uuid4())
     agent_identifier = os.getenv("AGENT_IDENTIFIER")
+    
+    # Log the input text (truncate if too long)
+    input_text = data.text
+    truncated_input = input_text[:100] + "..." if len(input_text) > 100 else input_text
+    logger.info(f"Received job request with input: '{truncated_input}'")
     logger.info(f"Starting job {job_id} with agent {agent_identifier}")
 
     # Define payment amounts

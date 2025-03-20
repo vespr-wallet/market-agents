@@ -4,11 +4,10 @@ import uuid
 from dotenv import load_dotenv
 from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
-from datetime import datetime, timezone
-from masumi_crewai.config import Config
-from masumi_crewai.payment import Payment, Amount
+from masumi.config import Config
+from masumi.payment import Payment, Amount
 from crew_definition import ResearchCrew
-from logging_config import setup_logging, get_logger
+from logging_config import setup_logging
 
 # Configure logging
 logger = setup_logging()
@@ -87,7 +86,8 @@ async def start_job(data: StartJobRequest):
         agent_identifier=agent_identifier,
         amounts=amounts,
         config=config,
-        identifier_from_purchaser="default_purchaser_id" # Best practice: Replace with a random identifier for each purchase
+        identifier_from_purchaser="default_purchaser_id", # Best practice: Replace with a random identifier for each purchase
+        input_data=data.text
     )
     
     logger.info("Creating payment request...")
@@ -123,8 +123,9 @@ async def start_job(data: StartJobRequest):
         "externalDisputeUnlockTime": payment_request["data"]["externalDisputeUnlockTime"],
         "agentIdentifier": agent_identifier,
         "sellerVkey": os.getenv("SELLER_VKEY"),
-        "identifierFromPurchaser": "example_identifier",
-        "amounts": amounts
+        "identifierFromPurchaser": payment.identifier_from_purchaser,
+        "amounts": amounts,
+        "input_hash": payment.input_hash
     }
 
 # ─────────────────────────────────────────────────────────────────────────────

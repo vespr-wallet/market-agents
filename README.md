@@ -160,10 +160,6 @@ cp .env.example .env
 Example `.env` configuration:
 
 ```ini
-# Registry Service
-REGISTRY_SERVICE_URL=http://localhost:3000/api/v1
-REGISTRY_API_KEY=your_registry_api_key
-
 # Payment Service
 PAYMENT_SERVICE_URL=http://localhost:3001/api/v1
 PAYMENT_API_KEY=your_payment_service_api_key
@@ -225,7 +221,7 @@ Note your `agentIdentifier` from the response and update it in your `.env` file.
 Start your FastAPI server with integrated Masumi payments:
 
 ```bash
-python main.py api
+uvicorn main:app --reload
 ```
 
 Visit your server at:

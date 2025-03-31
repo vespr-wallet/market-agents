@@ -94,13 +94,14 @@ async def start_job(data: StartJobRequest):
         # Define payment amounts
         payment_amount = os.getenv("PAYMENT_AMOUNT", "10000000")  # Default 10 ADA
         payment_unit = os.getenv("PAYMENT_UNIT", "lovelace") # Default lovelace
+
         amounts = [Amount(amount=payment_amount, unit=payment_unit)]
         logger.info(f"Using payment amount: {payment_amount} {payment_unit}")
         
         # Create a payment request using Masumi
         payment = Payment(
             agent_identifier=agent_identifier,
-            amounts=amounts,
+            #amounts=amounts,
             config=config,
             identifier_from_purchaser=data.identifier_from_purchaser,
             input_data=input_text

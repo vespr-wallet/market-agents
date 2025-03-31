@@ -243,6 +243,7 @@ async def check_availability():
     """ Checks if the server is operational """
     return {
         "status": "available",
+        "agentIdentifier": os.getenv("AGENT_IDENTIFIER"),
         "message": "The server is running smoothly."
     }
 

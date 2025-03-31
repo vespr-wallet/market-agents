@@ -104,7 +104,7 @@ async def start_job(data: StartJobRequest):
             #amounts=amounts,
             config=config,
             identifier_from_purchaser=data.identifier_from_purchaser,
-            input_data=input_text
+            input_data=data.input_data
         )
         
         logger.info("Creating payment request...")
@@ -118,7 +118,7 @@ async def start_job(data: StartJobRequest):
             "status": "awaiting_payment",
             "payment_status": "pending",
             "payment_id": payment_id,
-            "input_data": input_text,
+            "input_data": data.input_data,
             "result": None,
             "identifier_from_purchaser": data.identifier_from_purchaser
         }

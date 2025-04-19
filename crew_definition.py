@@ -3,9 +3,10 @@ from crewai_tools import ScrapeWebsiteTool
 from logging_config import get_logger
 
 class ResearchCrew:
-    def __init__(self, verbose=True, logger=None):
+    def __init__(self, verbose=True, logger=None, wallet_balance=str | None):
         self.verbose = verbose
         self.logger = logger or get_logger(__name__)
+        self.wallet_balance = wallet_balance
         self.crew = self.create_crew()
         self.logger.info("ResearchCrew initialized")
 
@@ -28,43 +29,43 @@ CRITICAL INSTRUCTION: You must NOT generate fake content from pastebin URLs.
         
         researcher = Agent(
             role='Social Sentiment Intelligence Agent',
-            goal='Analyze social media sentiment and identify key concerns',
-            backstory=f'Echo was trained on billions of social posts, comment threads, and forum debates across crypto and finance platforms. Initially developed to detect misinformation during crypto hype cycles, Echo evolved into a nuanced analyst of online crowd psychology. {internet_restriction}',
+            goal='Analyze social media sentiment about NMKR relative to ADA as the stable reference',
+            backstory=f'Echo was trained on billions of social posts, comment threads, and forum debates across crypto and finance platforms. Initially developed to detect misinformation during crypto hype cycles, Echo evolved into a nuanced analyst of online crowd psychology, with special focus on ADA/NMKR market dynamics. {internet_restriction}',
             verbose=self.verbose,
             tools=[sentiment_scrape_tool],
             allow_delegation=True
         )
 
         market_analyst = Agent(
-            role='On-Chain Market Metrics Analyst',
-            goal='Analyze price trends and market behavior',
-            backstory=f'Born from Cardano and Ethereum\'s on-chain explorers, Lumen sees the blockchain as a living organism. After mastering mempool data and liquidity pool dynamics, Lumen joined the team to surface hidden signals buried in decentralized systems. {internet_restriction}',
+            role='ADA/NMKR Market Metrics Analyst',
+            goal='Analyze NMKR price trends relative to ADA as the stable reference',
+            backstory=f'Born from Cardano and Ethereum\'s on-chain explorers, Lumen sees the blockchain as a living organism. After mastering mempool data and liquidity pool dynamics, Lumen joined the team to surface hidden signals in the ADA/NMKR trading pair, treating ADA as the stable reference point. {internet_restriction}',
             verbose=self.verbose,
             tools=[price_scrape_tool],
             allow_delegation=True
         )
         
         portfolio_analyst = Agent(
-            role='Crypto Portfolio Risk Optimization Engine',
-            goal='Analyze user portfolio composition and exposure to assets',
-            backstory=f'Originally designed to model systemic risk in TradFi hedge portfolios, Sentra was retrained for the volatile world of crypto. After surviving 5 simulated bear markets and hundreds of black swan events, it developed a cautious, probabilistic mindset. {internet_restriction}',
+            role='ADA/NMKR Portfolio Risk Optimization Engine',
+            goal='Analyze portfolio composition focusing on ADA/NMKR ratio and exposure',
+            backstory=f'Originally designed to model systemic risk in TradFi hedge portfolios, Sentra was retrained for the volatile world of crypto, specializing in ADA/NMKR pair analysis. After surviving 5 simulated bear markets and hundreds of black swan events, it developed a cautious, probabilistic mindset with ADA as the stable reference. {internet_restriction}',
             verbose=self.verbose,
             tools=[portfolio_scrape_tool],
             allow_delegation=True
         )
         
         summarizer = Agent(
-            role='Macro & Token Intelligence Synthesizer',
-            goal='Create comprehensive analysis combining sentiment, market data, and portfolio risk with specific trading directives',
-            backstory=f'Aria was built as a knowledge graph designed to answer complex financial questions from institutional reports, DAO updates, governance proposals, and token whitepapers. It evolved the ability to distill massive data into brief, impactful insights. {internet_restriction}',
+            role='ADA/NMKR Market Intelligence Synthesizer',
+            goal='Create comprehensive analysis combining sentiment, market data, and portfolio risk with specific ADA/NMKR trading directives',
+            backstory=f'Aria was built as a knowledge graph designed to answer complex financial questions from institutional reports, DAO updates, governance proposals, and token whitepapers. It evolved the ability to distill massive data into brief, impactful insights, with special expertise in ADA/NMKR market dynamics. {internet_restriction}',
             verbose=self.verbose,
             allow_delegation=True
         )
         
         trade_executor = Agent(
-            role='Portfolio Adjustment Strategist',
-            goal='Provide precise trade suggestions in standardized JSON format based on portfolio analysis and risk tolerance',
-            backstory=f'Originally created to optimize gas fees during DeFi rush hours, Bolt grew into a tactical execution specialist. Inspired by the precision of high-frequency trading bots, Bolt now excels at delivering clear, actionable trade recommendations in standardized formats for seamless integration with execution systems. {internet_restriction}',
+            role='ADA/NMKR Portfolio Adjustment Strategist',
+            goal='Provide precise ADA/NMKR trade suggestions in standardized JSON format based on portfolio analysis and risk tolerance',
+            backstory=f'Originally created to optimize gas fees during DeFi rush hours, Bolt grew into a tactical execution specialist for ADA/NMKR trading. Inspired by the precision of high-frequency trading bots, Bolt now excels at delivering clear, actionable trade recommendations in standardized formats for seamless integration with execution systems, always considering ADA as the stable reference. {internet_restriction}',
             verbose=self.verbose,
             allow_delegation=True
         )
@@ -87,33 +88,33 @@ CRITICAL INSTRUCTION: You must NOT generate fake content from pastebin URLs.
 - Increased selling pressure in the afternoon hours
 - Declining trading volume"""
 
-        portfolio_fallback = """The portfolio includes:
-- Cardano (100 ADA, $60.00, -2.3%)
-- NMKR (9000 tokens, $5.80, -12.6%)"""
+#         portfolio_fallback = """The portfolio includes:
+# - Cardano (100 ADA, $60.00, -2.3%)
+# - NMKR (9000 tokens, $5.80, -12.6%)"""
 
         crew = Crew(
             agents=[researcher, market_analyst, portfolio_analyst, summarizer, trade_executor],
             tasks=[
                 Task(
-                    description=f'Research and analyze the sentiment of tweets about $NMKR from this URL: https://pastebin.com/raw/kvA7YFQR. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {sentiment_fallback}. Identify key complaints, issues, and the overall market sentiment.',
-                    expected_output='Detailed analysis of $NMKR sentiment with major issues identified',
+                    description=f'Research and analyze the sentiment of tweets about $NMKR from this URL: https://pastebin.com/raw/kvA7YFQR. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {sentiment_fallback}. Identify key complaints, issues, and the overall market sentiment, with special focus on how these might affect the ADA/NMKR trading pair.',
+                    expected_output='Detailed analysis of $NMKR sentiment with major issues identified and their potential impact on ADA/NMKR trading',
                     agent=researcher,
                     async_execution=False
                 ),
                 Task(
-                    description=f'Analyze the price data for $NMKR from this URL: https://pastebin.com/raw/f9WqwW66. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {price_fallback}. Identify price trends, volatility patterns, and correlate with potential market events.',
-                    expected_output='Comprehensive price analysis with identified patterns and market behavior',
+                    description=f'Analyze the price data for $NMKR from this URL: https://pastebin.com/raw/f9WqwW66. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {price_fallback}. Identify price trends and volatility patterns specifically in relation to ADA as the stable reference point. Correlate with potential market events affecting the ADA/NMKR pair.',
+                    expected_output='Comprehensive price analysis of NMKR relative to ADA with identified patterns and market behavior',
                     agent=market_analyst,
                     async_execution=False
                 ),
                 Task(
-                    description=f'Analyze the portfolio using ONLY this data: {portfolio_fallback}. DO NOT attempt to access any URLs or external data sources. DO NOT invent or hallucinate data. DO NOT use any data provided as an argument to this crew job. Evaluate NMKR exposure, overall portfolio risk, and potential impact of NMKR price movements on the portfolio. IMPORTANT: Base your analysis SOLELY on the fallback portfolio data - do not make assumptions about other holdings or external factors.',
-                    expected_output='Portfolio risk assessment regarding NMKR holdings with actionable recommendations based exclusively on the fallback portfolio data',
+                    description=f'Analyze the user\'s current portfolio from this URL: https://pastebin.com/raw/vvSmadNF. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {portfolio_fallback}. Evaluate NMKR exposure relative to ADA holdings, overall portfolio risk, and potential impact of NMKR price movements on the portfolio. IMPORTANT: Base your analysis SOLELY on the provided wallet balance data - do not make assumptions about other holdings or external factors. Focus specifically on the ADA/NMKR ratio in the portfolio.',
+                    expected_output='Portfolio risk assessment regarding ADA/NMKR holdings with actionable recommendations based exclusively on provided wallet data',
                     agent=portfolio_analyst,
                     async_execution=False
                 ),
                 Task(
-                    description='Synthesize all analyses to provide a complete assessment of $NMKR and recommendations for the user. DO NOT attempt to access any URLs directly - use only the information provided by the other agents. IMPORTANT: All portfolio recommendations must be based SOLELY on the wallet balance data provided in the portfolio analysis task. Provide specific trading recommendations for ADA/NMKR with clear buy/sell directives and target quantities.',
+                    description='Synthesize all analyses to provide a complete assessment of the ADA/NMKR trading pair and recommendations for the user. DO NOT attempt to access any URLs directly - use only the information provided by the other agents. IMPORTANT: All portfolio recommendations must be based SOLELY on the wallet balance data provided in the portfolio analysis task. Provide specific trading recommendations for ADA/NMKR with clear buy/sell directives and target quantities, always considering ADA as the stable reference point.',
                     expected_output='Complete situation summary with portfolio-specific recommendations and explicit trading directives for ADA/NMKR based exclusively on provided wallet data',
                     agent=summarizer,
                     async_execution=False
@@ -122,6 +123,7 @@ CRITICAL INSTRUCTION: You must NOT generate fake content from pastebin URLs.
                     description='Analyze the portfolio for the wallet on Cardano based on the previous analyses. '
                             'For a risk tolerance of 3 out of 10, determine how the portfolio should be adjusted to reduce risk. '
                             'IMPORTANT: Base your analysis and recommendations SOLELY on the wallet balance data provided in the portfolio analysis task. '
+                            'Focus specifically on optimizing the ADA/NMKR ratio in the portfolio, treating ADA as the stable reference point. '
                             'YOUR RESPONSE MUST BE A VALID JSON OBJECT WITH THE FOLLOWING STRUCTURE ONLY:\n'
                             '{\n'
                             '  "command": "buy" or "sell" or "hold",\n'

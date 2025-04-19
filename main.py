@@ -78,14 +78,14 @@ class ProvideInputRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 class StartSuperRequest(BaseModel):
     identifier: str = "123123123123123"
-    text: str = "Analyze these tweets about $NMKR cryptocurrency and provide a detailed sentiment analysis."
+    address: str = "addr1...."
     payment_token: str = None  # Will use default if not provided
     
     class Config:
         json_schema_extra = {
             "example": {
                 "identifier": "unique_purchaser_id",
-                "text": "Analyze cryptocurrency sentiment",
+                "address": "addr1q9fjd9ca0mz8va2r8755rsg8f0wrpxrplxmuywx4ky4stgxyq9zqacteq5u0d9j46alzkc4pp79m8sxeejhfu8r0lmeqcfvlfl",
                 "payment_token": "your_payment_token"
             }
         }
@@ -569,6 +569,16 @@ async def start_super(data: StartSuperRequest, background_tasks: BackgroundTasks
     """
     All-in-one endpoint that handles job creation, payment, and execution
     """
+
+    # todo use the data.address to fetch wallet balance
+    wallet_balance = "100 ADA, 100 NMKR"
+
+    taskInfo = f"Analyze the portfolio for the wallet containing {wallet_balance} on Cardano. " \
+               "For a risk tolerance of 3 out of 10, tell me how I should adjust my portfolio to reduce risk. " \
+               "Format the response to reply follow the json structure with a 'command' field that is 'buy', 'sell' or 'hold' " \
+               "and a 'quantity' field that is a number. For example, a buy command with quantity 20 means buying 20 ADA worth of NMKR, " \
+               "a sell command with a quantity 20 means selling 20 tokens of NMKR. A hold command means holding the tokens without any action; " \
+               "in this case the quantity can be missing."
     job_id = str(uuid.uuid4())
     logger.info(f"Starting super job {job_id} with identifier {data.identifier}")
     
@@ -576,7 +586,7 @@ async def start_super(data: StartSuperRequest, background_tasks: BackgroundTasks
     super_jobs[job_id] = {
         "status": "initializing",
         "identifier": data.identifier,
-        "text": data.text,
+        "text": taskInfo,
         "start_time": time.time(),
         "payment_status": "pending",
         "result": None
@@ -590,7 +600,7 @@ async def start_super(data: StartSuperRequest, background_tasks: BackgroundTasks
         process_super_job, 
         job_id=job_id, 
         identifier=data.identifier, 
-        text=data.text, 
+        taskInfo=taskInfo,
         payment_token=payment_token
     )
     
@@ -625,7 +635,7 @@ async def super_status(job_id: str):
 # ─────────────────────────────────────────────────────────────────────────────
 # Super Job Processing
 # ─────────────────────────────────────────────────────────────────────────────
-async def process_super_job(job_id: str, identifier: str, text: str, payment_token: str):
+async def process_super_job(job_id: str, identifier: str, taskInfo: str, payment_token: str):
     """
     Process a super job from start to finish, similar to call_api.sh
     """
@@ -637,7 +647,7 @@ async def process_super_job(job_id: str, identifier: str, text: str, payment_tok
         start_job_data = {
             "identifier_from_purchaser": identifier,
             "input_data": {
-                "text": text
+                "text": taskInfo
             }
         }
         

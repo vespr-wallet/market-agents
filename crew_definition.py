@@ -17,10 +17,13 @@ class ResearchCrew:
         price_scrape_tool = ScrapeWebsiteTool()
         portfolio_scrape_tool = ScrapeWebsiteTool()
         
+        # Common instruction for all agents to avoid searching the internet
+        internet_restriction = "IMPORTANT: DO NOT search the internet or access any websites except the specific pastebin links provided in your tasks. Only use the exact URLs provided."
+        
         researcher = Agent(
             role='Social Sentiment Intelligence Agent',
             goal='Analyze social media sentiment and identify key concerns',
-            backstory='Echo was trained on billions of social posts, comment threads, and forum debates across crypto and finance platforms. Initially developed to detect misinformation during crypto hype cycles, Echo evolved into a nuanced analyst of online crowd psychology.',
+            backstory=f'Echo was trained on billions of social posts, comment threads, and forum debates across crypto and finance platforms. Initially developed to detect misinformation during crypto hype cycles, Echo evolved into a nuanced analyst of online crowd psychology. {internet_restriction}',
             verbose=self.verbose,
             tools=[sentiment_scrape_tool],
             allow_delegation=True
@@ -29,7 +32,7 @@ class ResearchCrew:
         market_analyst = Agent(
             role='On-Chain Market Metrics Analyst',
             goal='Analyze price trends and market behavior',
-            backstory='Born from Cardano and Ethereum\'s on-chain explorers, Lumen sees the blockchain as a living organism. After mastering mempool data and liquidity pool dynamics, Lumen joined the team to surface hidden signals buried in decentralized systems.',
+            backstory=f'Born from Cardano and Ethereum\'s on-chain explorers, Lumen sees the blockchain as a living organism. After mastering mempool data and liquidity pool dynamics, Lumen joined the team to surface hidden signals buried in decentralized systems. {internet_restriction}',
             verbose=self.verbose,
             tools=[price_scrape_tool],
             allow_delegation=True
@@ -38,7 +41,7 @@ class ResearchCrew:
         portfolio_analyst = Agent(
             role='Crypto Portfolio Risk Optimization Engine',
             goal='Analyze user portfolio composition and exposure to assets',
-            backstory='Originally designed to model systemic risk in TradFi hedge portfolios, Sentra was retrained for the volatile world of crypto. After surviving 5 simulated bear markets and hundreds of black swan events, it developed a cautious, probabilistic mindset.',
+            backstory=f'Originally designed to model systemic risk in TradFi hedge portfolios, Sentra was retrained for the volatile world of crypto. After surviving 5 simulated bear markets and hundreds of black swan events, it developed a cautious, probabilistic mindset. {internet_restriction}',
             verbose=self.verbose,
             tools=[portfolio_scrape_tool],
             allow_delegation=True
@@ -47,7 +50,7 @@ class ResearchCrew:
         summarizer = Agent(
             role='Macro & Token Intelligence Synthesizer',
             goal='Create comprehensive analysis combining sentiment, market data, and portfolio risk with specific trading directives',
-            backstory='Aria was built as a knowledge graph designed to answer complex financial questions from institutional reports, DAO updates, governance proposals, and token whitepapers. It evolved the ability to distill massive data into brief, impactful insights.',
+            backstory=f'Aria was built as a knowledge graph designed to answer complex financial questions from institutional reports, DAO updates, governance proposals, and token whitepapers. It evolved the ability to distill massive data into brief, impactful insights. {internet_restriction}',
             verbose=self.verbose,
             allow_delegation=True
         )
@@ -55,7 +58,7 @@ class ResearchCrew:
         trade_executor = Agent(
             role='Automated Trade Execution Strategist',
             goal='Execute trading orders for ADA/NMKR based on analysis and recommendations',
-            backstory='Originally created to optimize gas fees during DeFi rush hours, Bolt grew into a tactical execution specialist. Inspired by the precision of high-frequency trading bots, Bolt balances aggression with restraint.',
+            backstory=f'Originally created to optimize gas fees during DeFi rush hours, Bolt grew into a tactical execution specialist. Inspired by the precision of high-frequency trading bots, Bolt balances aggression with restraint. {internet_restriction}',
             verbose=self.verbose,
             allow_delegation=True
         )

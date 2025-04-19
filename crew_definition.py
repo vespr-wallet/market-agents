@@ -18,44 +18,44 @@ class ResearchCrew:
         portfolio_scrape_tool = ScrapeWebsiteTool()
         
         researcher = Agent(
-            role='Sentiment Analyst',
+            role='Social Sentiment Intelligence Agent',
             goal='Analyze social media sentiment and identify key concerns',
-            backstory='Expert at extracting sentiment from social media posts and identifying trends in public opinion',
+            backstory='Echo was trained on billions of social posts, comment threads, and forum debates across crypto and finance platforms. Initially developed to detect misinformation during crypto hype cycles, Echo evolved into a nuanced analyst of online crowd psychology.',
             verbose=self.verbose,
             tools=[sentiment_scrape_tool],
             allow_delegation=True
         )
 
         market_analyst = Agent(
-            role='Market Data Analyst',
+            role='On-Chain Market Metrics Analyst',
             goal='Analyze price trends and market behavior',
-            backstory='Financial analyst specialized in cryptocurrency price movements and market patterns',
+            backstory='Born from Cardano and Ethereum\'s on-chain explorers, Lumen sees the blockchain as a living organism. After mastering mempool data and liquidity pool dynamics, Lumen joined the team to surface hidden signals buried in decentralized systems.',
             verbose=self.verbose,
             tools=[price_scrape_tool],
             allow_delegation=True
         )
         
         portfolio_analyst = Agent(
-            role='Portfolio Risk Analyst',
+            role='Crypto Portfolio Risk Optimization Engine',
             goal='Analyze user portfolio composition and exposure to assets',
-            backstory='Specialized in evaluating investment portfolios, risk assessment, and providing recommendations for risk management',
+            backstory='Originally designed to model systemic risk in TradFi hedge portfolios, Sentra was retrained for the volatile world of crypto. After surviving 5 simulated bear markets and hundreds of black swan events, it developed a cautious, probabilistic mindset.',
             verbose=self.verbose,
             tools=[portfolio_scrape_tool],
             allow_delegation=True
         )
         
         summarizer = Agent(
-            role='Financial Intelligence Summarizer',
+            role='Macro & Token Intelligence Synthesizer',
             goal='Create comprehensive analysis combining sentiment, market data, and portfolio risk with specific trading directives',
-            backstory='Expert at synthesizing multiple data sources to provide actionable intelligence and trading recommendations for investors. Works closely with the trading desk to ensure recommendations are properly executed.',
+            backstory='Aria was built as a knowledge graph designed to answer complex financial questions from institutional reports, DAO updates, governance proposals, and token whitepapers. It evolved the ability to distill massive data into brief, impactful insights.',
             verbose=self.verbose,
             allow_delegation=True
         )
         
         trade_executor = Agent(
-            role='Trading Execution Specialist',
+            role='Automated Trade Execution Strategist',
             goal='Execute trading orders for ADA/NMKR based on analysis and recommendations',
-            backstory='Experienced cryptocurrency trader specialized in executing trades with optimal timing and conditions. Responsible for implementing the trading recommendations and reporting execution status.',
+            backstory='Originally created to optimize gas fees during DeFi rush hours, Bolt grew into a tactical execution specialist. Inspired by the precision of high-frequency trading bots, Bolt balances aggression with restraint.',
             verbose=self.verbose,
             allow_delegation=True
         )
@@ -84,13 +84,13 @@ class ResearchCrew:
                     async_execution=False
                 ),
                 Task(
-                    description='Synthesize all analyses (sentiment, price data, and portfolio risk) to provide a complete assessment of $NMKR and recommendations for the user. Ask questions to all three analysts to clarify any points. Determine if negative sentiment is reflected in price action, assess portfolio risk exposure, identify potential causes of market behavior, and provide specific trading recommendations for ADA/NMKR with clear buy/sell directives and target quantities.',
+                    description='Synthesize all analyses to provide a complete assessment of $NMKR and recommendations for the user. Provide specific trading recommendations for ADA/NMKR with clear buy/sell directives and target quantities.',
                     expected_output='Complete situation summary with portfolio-specific recommendations and explicit trading directives for ADA/NMKR',
                     agent=summarizer,
                     async_execution=False
                 ),
                 Task(
-                    description='Execute the trading recommendations provided by the Financial Intelligence Summarizer. The Summarizer will provide specific trading directives for ADA/NMKR. Implement these trades, considering market conditions, timing, and optimal execution strategies. Report back on execution status, actual trade prices, and any deviations from the recommendations.',
+                    description='Execute the trading recommendations provided by the Financial Intelligence Summarizer. Implement these trades, considering market conditions, timing, and optimal execution strategies. Report back on execution status, actual trade prices, and any deviations from the recommendations.',
                     expected_output='Trade execution report with details on executed orders, prices, quantities, and execution quality',
                     agent=trade_executor,
                     async_execution=False

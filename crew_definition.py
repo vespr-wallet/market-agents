@@ -62,9 +62,9 @@ CRITICAL INSTRUCTION: You must NOT generate fake content from pastebin URLs.
         )
         
         trade_executor = Agent(
-            role='Automated Trade Execution Strategist',
-            goal='Execute trading orders for ADA/NMKR based on analysis and recommendations',
-            backstory=f'Originally created to optimize gas fees during DeFi rush hours, Bolt grew into a tactical execution specialist. Inspired by the precision of high-frequency trading bots, Bolt balances aggression with restraint. {internet_restriction}',
+            role='Portfolio Adjustment Strategist',
+            goal='Provide precise trade suggestions in standardized JSON format based on portfolio analysis and risk tolerance',
+            backstory=f'Originally created to optimize gas fees during DeFi rush hours, Bolt grew into a tactical execution specialist. Inspired by the precision of high-frequency trading bots, Bolt now excels at delivering clear, actionable trade recommendations in standardized formats for seamless integration with execution systems. {internet_restriction}',
             verbose=self.verbose,
             allow_delegation=True
         )
@@ -108,20 +108,33 @@ CRITICAL INSTRUCTION: You must NOT generate fake content from pastebin URLs.
                     async_execution=False
                 ),
                 Task(
-                    description=f'Analyze the user\'s current portfolio from this URL: https://pastebin.com/raw/vvSmadNF. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {portfolio_fallback}. Evaluate NMKR exposure, overall portfolio risk, and potential impact of NMKR price movements on the portfolio.',
-                    expected_output='Portfolio risk assessment regarding NMKR holdings with actionable recommendations',
+                    description=f'Analyze the user\'s current portfolio from this URL: https://pastebin.com/raw/vvSmadNF. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {portfolio_fallback}. Evaluate NMKR exposure, overall portfolio risk, and potential impact of NMKR price movements on the portfolio. IMPORTANT: Base your analysis SOLELY on the provided wallet balance data - do not make assumptions about other holdings or external factors.',
+                    expected_output='Portfolio risk assessment regarding NMKR holdings with actionable recommendations based exclusively on provided wallet data',
                     agent=portfolio_analyst,
                     async_execution=False
                 ),
                 Task(
-                    description='Synthesize all analyses to provide a complete assessment of $NMKR and recommendations for the user. DO NOT attempt to access any URLs directly - use only the information provided by the other agents. Provide specific trading recommendations for ADA/NMKR with clear buy/sell directives and target quantities.',
-                    expected_output='Complete situation summary with portfolio-specific recommendations and explicit trading directives for ADA/NMKR',
+                    description='Synthesize all analyses to provide a complete assessment of $NMKR and recommendations for the user. DO NOT attempt to access any URLs directly - use only the information provided by the other agents. IMPORTANT: All portfolio recommendations must be based SOLELY on the wallet balance data provided in the portfolio analysis task. Provide specific trading recommendations for ADA/NMKR with clear buy/sell directives and target quantities.',
+                    expected_output='Complete situation summary with portfolio-specific recommendations and explicit trading directives for ADA/NMKR based exclusively on provided wallet data',
                     agent=summarizer,
                     async_execution=False
                 ),
                 Task(
-                    description='Execute the trading recommendations provided by the Macro & Token Intelligence Synthesizer. DO NOT attempt to access any URLs directly - use only the information provided by the other agents. Implement these trades, considering market conditions, timing, and optimal execution strategies. Report back on execution status, actual trade prices, and any deviations from the recommendations.',
-                    expected_output='Trade execution report with details on executed orders, prices, quantities, and execution quality',
+                    description='Analyze the portfolio for the wallet on Cardano based on the previous analyses. '
+                            'For a risk tolerance of 3 out of 10, determine how the portfolio should be adjusted to reduce risk. '
+                            'IMPORTANT: Base your analysis and recommendations SOLELY on the wallet balance data provided in the portfolio analysis task. '
+                            'YOUR RESPONSE MUST BE A VALID JSON OBJECT WITH THE FOLLOWING STRUCTURE ONLY:\n'
+                            '{\n'
+                            '  "command": "buy" or "sell" or "hold",\n'
+                            '  "quantity": numeric_value,\n' 
+                            '  "summary": "Brief 2-sentence explanation of strategy and reasoning"\n'
+                            '}\n\n'
+                            'EXAMPLES:\n'
+                            '1. {"command": "sell", "quantity": 50000, "summary": "Reducing NMKR exposure due to negative sentiment and price trends. Portfolio rebalancing recommended to limit downside risk."}\n'
+                            '2. {"command": "hold", "quantity": 0, "summary": "Current portfolio allocation is appropriate for the risk tolerance level. No immediate action required."}\n'
+                            '3. {"command": "buy", "quantity": 10000, "summary": "Current dip presents buying opportunity with strong fundamentals. Small position increase recommended for long-term growth."}\n\n'
+                            'DO NOT include any text outside the JSON structure. DO NOT include explanations, disclaimers, or any other content.',
+                    expected_output='JSON formatted trade suggestion with "command", "quantity", and "summary" fields for portfolio adjustment',
                     agent=trade_executor,
                     async_execution=False
                 )

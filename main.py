@@ -571,12 +571,7 @@ async def start_super(data: StartSuperRequest, background_tasks: BackgroundTasks
     # todo use the data.address to fetch wallet balance
     wallet_balance = "100 ADA, 100 NMKR"
 
-    taskInfo = f"Analyze the portfolio for the wallet containing {wallet_balance} on Cardano. " \
-               "For a risk tolerance of 3 out of 10, tell me how I should adjust my portfolio to reduce risk. " \
-               "Format the response to reply follow the json structure with a 'command' field that is 'buy', 'sell' or 'hold' " \
-               "and a 'quantity' field that is a number. For example, a buy command with quantity 20 means buying 20 ADA worth of NMKR, " \
-               "a sell command with a quantity 20 means selling 20 tokens of NMKR. A hold command means holding the tokens without any action; " \
-               "in this case the quantity can be missing."
+    taskInfo = f"User portofolio consists of: {wallet_balance}" 
     job_id = str(uuid.uuid4())
     logger.info(f"Starting super job {job_id} with identifier {data.identifier}")
     

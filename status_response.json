@@ -1,0 +1,61 @@
+{"job_id":"59ef17c1-7dd2-4f3f-848e-28ffcde43446","status":"completed","payment_status":"completed","result":{"raw":"The sentiment analysis of $NMKR reveals a predominantly negative perception among its community, primarily articulated through discussions on social media. The following are the key findings from this analysis:
+
+1. **Rug Pull Accusations**: A significant number of users have expressed feelings of betrayal, suggesting that $NMKR may be perceived as a potential rug pull within the Cardano ecosystem. This sentiment highlights a severe erosion of trust among investors, posing a significant red flag.
+
+2. **Stagnation and Lack of Progress**: Investors are vocal about their disappointment with the apparent stagnation in the project's development, citing \"zero updates\" and \"zero progress\" as major concerns. This lack of communication and advancement from the developers has fostered frustration in the community.
+
+3. **Questioning Project Viability**: The sentiment analysis includes references to $NMKR as a \"ghost token,\" indicating skepticism about the project’s future. Users are questioning its viability, compounded by minimal to non-existent updates and communication.
+
+4. **Technical Issues**: Feedback concerning the platform's usability is mostly negative, with users reporting that it is \"riddled with bugs and glitches,\" deeming it unfit for practical use. This critical feedback detracts from user confidence and overall attractiveness of the product.
+
+5. **Scam Allegations**: Serious allegations have surfaced, labeling $NMKR as a potential scam. Terms like \"empty promises\" and a lack of a comprehensive roadmap contribute to this damaging perception and further erode trust in the project.
+
+6. **Community Behavior**: The community dynamics around $NMKR have been described as \"toxic,\" where constructive criticism often leads to individuals being blocked. Such behavior creates an unwelcoming atmosphere for both new and existing investors, potentially diminishing the project's reputation.
+
+7. **Market Performance**: Observations indicate a declining market cap alongside a perceived lack of product output from the developers, summing up the situation as a \"sinking ship.\" This bearish sentiment underlines the urgency for improvement and transparency.
+
+8. **Transparency Issues**: There exists a pronounced focus on the project's lack of transparency. Users feel that $NMKR operates in obscurity with unclear visibility into its processes and future objectives, raising substantial concerns about accountability.
+
+9. **General Discontent**: The overarching sentiment among tweets reveals a strong desire to steer clear of $NMKR due to persistent unanswered questions and inadequate progress. This overall perception underscores a significant level of distrust and frustration within the community.
+
+In conclusion, the market perception of $NMKR is starkly negative, encapsulated by complaints of stagnation, suspicious practices, technical shortcomings, and a generally toxic community atmosphere. These insights suggest that potential investors should exercise caution and consider the critical feedback before engaging further with the token.","pydantic":null,"json_dict":null,"tasks_output":[{"description":"Research and analyze the sentiment of tweets about $NMKR from this URL: https://pastebin.com/raw/kvA7YFQR. Identify key complaints, issues, and the overall market sentiment.","name":null,"expected_output":"Detailed analysis of $NMKR sentiment with major issues identified","summary":"Research and analyze the sentiment of tweets about $NMKR from...","raw":"The sentiment around $NMKR appears to be overwhelmingly negative based on the gathered tweets. Here is a detailed analysis:
+
+1. **Rug Pull Accusations**: Multiple users expressed feeling burned by $NMKR, referring to it as another potential rug pull within the Cardano ecosystem. This suggests a lack of trust among investors.
+
+2. **Stagnation and Lack of Progress**: Users have voiced their disappointment regarding the apparent stagnation in the project's development, noting \"zero updates\" and \"zero progress.\" This indicates frustration with the lack of communication and advancement from the developers.
+
+3. **Questioning Project Viability**: Tweets question the very existence of $NMKR, with terms like \"ghost token\" being used to describe its minimal or non-existent updates and communication. This reflects a sentiment of skepticism about the project's future.
+
+4. **Technical Issues**: Several users commented on the platform's usability, highlighting that it is \"riddled with bugs and glitches,\" and not ready for practical use. This is critical feedback that impacts user confidence.
+
+5. **Scam Allegations**: There are serious allegations of $NMKR being a scam. Comments like \"empty promises\" and comparisons to lacking a detailed roadmap contribute to this perception.
+
+6. **Community Behavior**: The sentiment in the community surrounding $NMKR is described as \"toxic,\" where criticism leads to blocking individuals. Such behavior can deter new and existing investors, creating an unwelcoming environment.
+
+7. **Market Performance**: Users are noting a plummeting market cap and a lack of product from the developers, deeming it a \"sinking ship.\" This reflects an overall bearish sentiment for the token.
+
+8. **Transparency Issues**: There is a significant emphasis on the lack of transparency, with users feeling that the project operates in the shadows without clear visibility into its operations or future plans.
+
+9. **General Discontent**: Overall, the tweets express a desire to avoid $NMKR due to unanswered questions and insufficient progress, signifying a strong sentiment of distrust and frustration among the community.
+
+The overall market sentiment for $NMKR is negative, characterized by complaints of stagnation, lack of communication, perceived scams, technical issues, and a toxic community atmosphere.","pydantic":null,"json_dict":null,"agent":"Research Analyst","output_format":"raw"},{"description":"Write a comprehensive summary of the $NMKR sentiment analysis. Include the main criticisms, potential red flags, and overall market perception.","name":null,"expected_output":"Clear and concise summary of the $NMKR sentiment analysis with actionable insights","summary":"Write a comprehensive summary of the $NMKR sentiment analysis. Include...","raw":"The sentiment analysis of $NMKR reveals a predominantly negative perception among its community, primarily articulated through discussions on social media. The following are the key findings from this analysis:
+
+1. **Rug Pull Accusations**: A significant number of users have expressed feelings of betrayal, suggesting that $NMKR may be perceived as a potential rug pull within the Cardano ecosystem. This sentiment highlights a severe erosion of trust among investors, posing a significant red flag.
+
+2. **Stagnation and Lack of Progress**: Investors are vocal about their disappointment with the apparent stagnation in the project's development, citing \"zero updates\" and \"zero progress\" as major concerns. This lack of communication and advancement from the developers has fostered frustration in the community.
+
+3. **Questioning Project Viability**: The sentiment analysis includes references to $NMKR as a \"ghost token,\" indicating skepticism about the project’s future. Users are questioning its viability, compounded by minimal to non-existent updates and communication.
+
+4. **Technical Issues**: Feedback concerning the platform's usability is mostly negative, with users reporting that it is \"riddled with bugs and glitches,\" deeming it unfit for practical use. This critical feedback detracts from user confidence and overall attractiveness of the product.
+
+5. **Scam Allegations**: Serious allegations have surfaced, labeling $NMKR as a potential scam. Terms like \"empty promises\" and a lack of a comprehensive roadmap contribute to this damaging perception and further erode trust in the project.
+
+6. **Community Behavior**: The community dynamics around $NMKR have been described as \"toxic,\" where constructive criticism often leads to individuals being blocked. Such behavior creates an unwelcoming atmosphere for both new and existing investors, potentially diminishing the project's reputation.
+
+7. **Market Performance**: Observations indicate a declining market cap alongside a perceived lack of product output from the developers, summing up the situation as a \"sinking ship.\" This bearish sentiment underlines the urgency for improvement and transparency.
+
+8. **Transparency Issues**: There exists a pronounced focus on the project's lack of transparency. Users feel that $NMKR operates in obscurity with unclear visibility into its processes and future objectives, raising substantial concerns about accountability.
+
+9. **General Discontent**: The overarching sentiment among tweets reveals a strong desire to steer clear of $NMKR due to persistent unanswered questions and inadequate progress. This overall perception underscores a significant level of distrust and frustration within the community.
+
+In conclusion, the market perception of $NMKR is starkly negative, encapsulated by complaints of stagnation, suspicious practices, technical shortcomings, and a generally toxic community atmosphere. These insights suggest that potential investors should exercise caution and consider the critical feedback before engaging further with the token.","pydantic":null,"json_dict":null,"agent":"Content Summarizer","output_format":"raw"}],"token_usage":{"total_tokens":3020,"prompt_tokens":1936,"cached_prompt_tokens":0,"completion_tokens":1084,"successful_requests":3}}}

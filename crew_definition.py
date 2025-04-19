@@ -1,4 +1,5 @@
 from crewai import Agent, Crew, Task
+from crewai_tools import ScrapeWebsiteTool
 from logging_config import get_logger
 
 class ResearchCrew:
@@ -11,11 +12,15 @@ class ResearchCrew:
     def create_crew(self):
         self.logger.info("Creating research crew with agents")
         
+        # Create scraping tool
+        scrape_tool = ScrapeWebsiteTool()
+        
         researcher = Agent(
             role='Research Analyst',
             goal='Find and analyze key information',
             backstory='Expert at extracting information',
-            verbose=self.verbose
+            verbose=self.verbose,
+            tools=[scrape_tool]
         )
 
         writer = Agent(
@@ -31,13 +36,13 @@ class ResearchCrew:
             agents=[researcher, writer],
             tasks=[
                 Task(
-                    description='Research: {text}',
-                    expected_output='Detailed research findings about the topic',
+                    description='Research and analyze the sentiment of tweets about $NMKR from this URL: https://pastebin.com/raw/kvA7YFQR. Identify key complaints, issues, and the overall market sentiment.',
+                    expected_output='Detailed analysis of $NMKR sentiment with major issues identified',
                     agent=researcher
                 ),
                 Task(
-                    description='Write summary',
-                    expected_output='Clear and concise summary of the research findings',
+                    description='Write a comprehensive summary of the $NMKR sentiment analysis. Include the main criticisms, potential red flags, and overall market perception.',
+                    expected_output='Clear and concise summary of the $NMKR sentiment analysis with actionable insights',
                     agent=writer
                 )
             ]

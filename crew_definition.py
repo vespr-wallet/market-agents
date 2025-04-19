@@ -70,7 +70,7 @@ class ResearchCrew:
                     async_execution=False
                 ),
                 Task(
-                    description='Analyze the user\'s current portfolio from this data: https://pastebin.com/raw/icjCVgjL. ONLY use this exact URL - do not try to access other websites. If you encounter any errors, work with the raw data provided in the task description: The portfolio includes Bitcoin (0.75 BTC, $58,425.75, +1.2%), Ethereum (8.5 ETH, $21,930.50, -0.8%), Cardano (12500 ADA, $7,625.00, -2.3%), NMKR (850000 tokens, $854.25, -12.6%), Solana (45 SOL, $6,750.00, +3.1%), USDC (5000, $5,000.00, 0.0%) with a total portfolio value of $100,585.50 (-0.5%). Evaluate NMKR exposure, overall portfolio risk, and potential impact of NMKR price movements on the portfolio.',
+                    description='Analyze the user\'s current portfolio from this data: https://pastebin.com/raw/vvSmadNF. ONLY use this exact URL - do not try to access other websites. If you encounter any errors, work with the raw data provided in the task description: The portfolio includes Bitcoin (0.75 BTC, $58,425.75, +1.2%), Ethereum (8.5 ETH, $21,930.50, -0.8%), Cardano (12500 ADA, $7,625.00, -2.3%), NMKR (850000 tokens, $854.25, -12.6%), Solana (45 SOL, $6,750.00, +3.1%), USDC (5000, $5,000.00, 0.0%) with a total portfolio value of $100,585.50 (-0.5%). Evaluate NMKR exposure, overall portfolio risk, and potential impact of NMKR price movements on the portfolio.',
                     expected_output='Portfolio risk assessment regarding NMKR holdings with actionable recommendations',
                     agent=portfolio_analyst,
                     async_execution=False

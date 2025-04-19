@@ -12,28 +12,37 @@ class ResearchCrew:
     def create_crew(self):
         self.logger.info("Creating research crew with agents")
         
-        # Create scraping tool
-        scrape_tool = ScrapeWebsiteTool()
+        # Create scraping tools
+        sentiment_scrape_tool = ScrapeWebsiteTool()
+        price_scrape_tool = ScrapeWebsiteTool()
         
         researcher = Agent(
-            role='Research Analyst',
-            goal='Find and analyze key information',
-            backstory='Expert at extracting information',
+            role='Sentiment Analyst',
+            goal='Analyze social media sentiment and identify key concerns',
+            backstory='Expert at extracting sentiment from social media posts and identifying trends in public opinion',
             verbose=self.verbose,
-            tools=[scrape_tool]
+            tools=[sentiment_scrape_tool]
         )
 
-        writer = Agent(
-            role='Content Summarizer',
-            goal='Create clear summaries from research',
-            backstory='Skilled at transforming complex information',
+        market_analyst = Agent(
+            role='Market Data Analyst',
+            goal='Analyze price trends and market behavior',
+            backstory='Financial analyst specialized in cryptocurrency price movements and market patterns',
+            verbose=self.verbose,
+            tools=[price_scrape_tool]
+        )
+        
+        summarizer = Agent(
+            role='Financial Intelligence Summarizer',
+            goal='Create comprehensive analysis combining sentiment and market data',
+            backstory='Expert at synthesizing multiple data sources to provide actionable intelligence for investors',
             verbose=self.verbose
         )
 
-        self.logger.info("Created research and writer agents")
+        self.logger.info("Created sentiment analyst, market analyst, and summarizer agents")
 
         crew = Crew(
-            agents=[researcher, writer],
+            agents=[researcher, market_analyst, summarizer],
             tasks=[
                 Task(
                     description='Research and analyze the sentiment of tweets about $NMKR from this URL: https://pastebin.com/raw/kvA7YFQR. Identify key complaints, issues, and the overall market sentiment.',
@@ -41,9 +50,14 @@ class ResearchCrew:
                     agent=researcher
                 ),
                 Task(
-                    description='Write a comprehensive summary of the $NMKR sentiment analysis. Include the main criticisms, potential red flags, and overall market perception.',
-                    expected_output='Clear and concise summary of the $NMKR sentiment analysis with actionable insights',
-                    agent=writer
+                    description='Analyze the price data for $NMKR from this URL: https://pastebin.com/f9WqwW66. Identify price trends, volatility patterns, and correlate with potential market events.',
+                    expected_output='Comprehensive price analysis with identified patterns and market behavior',
+                    agent=market_analyst
+                ),
+                Task(
+                    description='Synthesize the sentiment analysis and price data to provide a complete assessment of $NMKR. Determine if negative sentiment is reflected in price action, identify potential causes, and provide an overall evaluation of the project\'s status and prospects.',
+                    expected_output='Complete situation summary connecting sentiment and price action with actionable insights',
+                    agent=summarizer
                 )
             ]
         )

@@ -108,7 +108,7 @@ CRITICAL INSTRUCTION: You must NOT generate fake content from pastebin URLs.
                     async_execution=False
                 ),
                 Task(
-                    description=f'Analyze the user\'s current portfolio from this URL: https://pastebin.com/raw/vvSmadNF. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {portfolio_fallback}. Evaluate NMKR exposure relative to ADA holdings, overall portfolio risk, and potential impact of NMKR price movements on the portfolio. IMPORTANT: Base your analysis SOLELY on the provided wallet balance data - do not make assumptions about other holdings or external factors. Focus specifically on the ADA/NMKR ratio in the portfolio.',
+                    description=f'Analyze the user\'s current portfolio from this URL: https://pastebin.com/raw/vvSmadNF. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {self.wallet_balance}. Evaluate NMKR exposure relative to ADA holdings, overall portfolio risk, and potential impact of NMKR price movements on the portfolio. IMPORTANT: Base your analysis SOLELY on the provided wallet balance data - do not make assumptions about other holdings or external factors. Focus specifically on the ADA/NMKR ratio in the portfolio.',
                     expected_output='Portfolio risk assessment regarding ADA/NMKR holdings with actionable recommendations based exclusively on provided wallet data',
                     agent=portfolio_analyst,
                     async_execution=False

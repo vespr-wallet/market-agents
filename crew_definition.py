@@ -46,16 +46,24 @@ class ResearchCrew:
         
         summarizer = Agent(
             role='Financial Intelligence Summarizer',
-            goal='Create comprehensive analysis combining sentiment, market data, and portfolio risk',
-            backstory='Expert at synthesizing multiple data sources to provide actionable intelligence and recommendations for investors',
+            goal='Create comprehensive analysis combining sentiment, market data, and portfolio risk with specific trading directives',
+            backstory='Expert at synthesizing multiple data sources to provide actionable intelligence and trading recommendations for investors. Works closely with the trading desk to ensure recommendations are properly executed.',
+            verbose=self.verbose,
+            allow_delegation=True
+        )
+        
+        trade_executor = Agent(
+            role='Trading Execution Specialist',
+            goal='Execute trading orders for ADA/NMKR based on analysis and recommendations',
+            backstory='Experienced cryptocurrency trader specialized in executing trades with optimal timing and conditions. Responsible for implementing the trading recommendations and reporting execution status.',
             verbose=self.verbose,
             allow_delegation=True
         )
 
-        self.logger.info("Created sentiment analyst, market analyst, portfolio analyst, and summarizer agents")
+        self.logger.info("Created sentiment analyst, market analyst, portfolio analyst, summarizer, and trade executor agents")
 
         crew = Crew(
-            agents=[researcher, market_analyst, portfolio_analyst, summarizer],
+            agents=[researcher, market_analyst, portfolio_analyst, summarizer, trade_executor],
             tasks=[
                 Task(
                     description='Research and analyze the sentiment of tweets about $NMKR from this URL: https://pastebin.com/raw/kvA7YFQR. ONLY use this exact URL - do not try to access other websites. If you encounter any errors, work with the raw data provided in the task description: The tweets include complaints about lack of updates, stagnation, bugs in the platform, empty promises, toxic community, plummeting market cap, and lack of transparency. Identify key complaints, issues, and the overall market sentiment.',
@@ -76,9 +84,15 @@ class ResearchCrew:
                     async_execution=False
                 ),
                 Task(
-                    description='Synthesize all analyses (sentiment, price data, and portfolio risk) to provide a complete assessment of $NMKR and recommendations for the user. Ask questions to all three analysts to clarify any points. Determine if negative sentiment is reflected in price action, assess portfolio risk exposure, identify potential causes of market behavior, and provide an overall evaluation of the project\'s status with specific recommendations for the user\'s holdings.',
-                    expected_output='Complete situation summary with portfolio-specific recommendations and risk management strategy',
+                    description='Synthesize all analyses (sentiment, price data, and portfolio risk) to provide a complete assessment of $NMKR and recommendations for the user. Ask questions to all three analysts to clarify any points. Determine if negative sentiment is reflected in price action, assess portfolio risk exposure, identify potential causes of market behavior, and provide specific trading recommendations for ADA/NMKR with clear buy/sell directives and target quantities.',
+                    expected_output='Complete situation summary with portfolio-specific recommendations and explicit trading directives for ADA/NMKR',
                     agent=summarizer,
+                    async_execution=False
+                ),
+                Task(
+                    description='Execute the trading recommendations provided by the Financial Intelligence Summarizer. The Summarizer will provide specific trading directives for ADA/NMKR. Implement these trades, considering market conditions, timing, and optimal execution strategies. Report back on execution status, actual trade prices, and any deviations from the recommendations.',
+                    expected_output='Trade execution report with details on executed orders, prices, quantities, and execution quality',
+                    agent=trade_executor,
                     async_execution=False
                 )
             ],

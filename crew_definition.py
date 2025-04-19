@@ -17,8 +17,14 @@ class ResearchCrew:
         price_scrape_tool = ScrapeWebsiteTool()
         portfolio_scrape_tool = ScrapeWebsiteTool()
         
-        # Common instruction for all agents to avoid searching the internet
-        internet_restriction = "IMPORTANT: DO NOT search the internet or access any websites except the specific pastebin links provided in your tasks. Only use the exact URLs provided."
+        # Enhanced instruction for all agents to prevent faking pastebin data
+        internet_restriction = """
+CRITICAL INSTRUCTION: You must NOT generate fake content from pastebin URLs.
+- If accessing the pastebin URL succeeds, use ONLY the actual data returned.
+- If accessing the URL fails, use ONLY the fallback data provided in your task description.
+- NEVER invent, hallucinate, or simulate the contents of these URLs.
+- DO NOT try to access any websites other than the specific pastebin URLs provided.
+"""
         
         researcher = Agent(
             role='Social Sentiment Intelligence Agent',
@@ -65,35 +71,56 @@ class ResearchCrew:
 
         self.logger.info("Created sentiment analyst, market analyst, portfolio analyst, summarizer, and trade executor agents")
 
+        # Fallback data for each task
+        sentiment_fallback = """The tweets include complaints about:
+- Lack of updates from the team
+- Stagnation in development and progress
+- Bugs in the NMKR platform
+- Empty promises from leadership
+- Toxic community dynamics
+- Plummeting market cap
+- Lack of transparency"""
+
+        price_fallback = """The data shows:
+- Consistent price decline from 0.001150 to 0.001005 over a 24-hour period
+- Multiple attempts to establish support but failing
+- Increased selling pressure in the afternoon hours
+- Declining trading volume"""
+
+        portfolio_fallback = """The portfolio includes:
+- Cardano (12500 ADA, $7,625.00, -2.3%)
+- NMKR (850000 tokens, $854.25, -12.6%)
+- Total portfolio value: $8,479.25 (-3.5%)"""
+
         crew = Crew(
             agents=[researcher, market_analyst, portfolio_analyst, summarizer, trade_executor],
             tasks=[
                 Task(
-                    description='Research and analyze the sentiment of tweets about $NMKR from this URL: https://pastebin.com/raw/kvA7YFQR. ONLY use this exact URL - do not try to access other websites. If you encounter any errors, work with the raw data provided in the task description: The tweets include complaints about lack of updates, stagnation, bugs in the platform, empty promises, toxic community, plummeting market cap, and lack of transparency. Identify key complaints, issues, and the overall market sentiment.',
+                    description=f'Research and analyze the sentiment of tweets about $NMKR from this URL: https://pastebin.com/raw/kvA7YFQR. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {sentiment_fallback}. Identify key complaints, issues, and the overall market sentiment.',
                     expected_output='Detailed analysis of $NMKR sentiment with major issues identified',
                     agent=researcher,
                     async_execution=False
                 ),
                 Task(
-                    description='Analyze the price data for $NMKR from this URL: https://pastebin.com/raw/f9WqwW66. ONLY use this exact URL - do not try to access other websites. If you encounter any errors, work with the raw data provided in the task description: The data shows a consistent price decline from 0.001150 to 0.001005 over a 24-hour period. Identify price trends, volatility patterns, and correlate with potential market events.',
+                    description=f'Analyze the price data for $NMKR from this URL: https://pastebin.com/raw/f9WqwW66. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {price_fallback}. Identify price trends, volatility patterns, and correlate with potential market events.',
                     expected_output='Comprehensive price analysis with identified patterns and market behavior',
                     agent=market_analyst,
                     async_execution=False
                 ),
                 Task(
-                    description='Analyze the user\'s current portfolio from this data: https://pastebin.com/raw/vvSmadNF. ONLY use this exact URL - do not try to access other websites. If you encounter any errors, work with the raw data provided in the task description: The portfolio includes  Cardano (12500 ADA, $7,625.00, -2.3%), NMKR (850000 tokens, $854.25, -12.6%) with a total portfolio value of 8479.25 (-3.5%). Evaluate NMKR exposure, overall portfolio risk, and potential impact of NMKR price movements on the portfolio.',
+                    description=f'Analyze the user\'s current portfolio from this URL: https://pastebin.com/raw/vvSmadNF. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {portfolio_fallback}. Evaluate NMKR exposure, overall portfolio risk, and potential impact of NMKR price movements on the portfolio.',
                     expected_output='Portfolio risk assessment regarding NMKR holdings with actionable recommendations',
                     agent=portfolio_analyst,
                     async_execution=False
                 ),
                 Task(
-                    description='Synthesize all analyses to provide a complete assessment of $NMKR and recommendations for the user. Provide specific trading recommendations for ADA/NMKR with clear buy/sell directives and target quantities.',
+                    description='Synthesize all analyses to provide a complete assessment of $NMKR and recommendations for the user. DO NOT attempt to access any URLs directly - use only the information provided by the other agents. Provide specific trading recommendations for ADA/NMKR with clear buy/sell directives and target quantities.',
                     expected_output='Complete situation summary with portfolio-specific recommendations and explicit trading directives for ADA/NMKR',
                     agent=summarizer,
                     async_execution=False
                 ),
                 Task(
-                    description='Execute the trading recommendations provided by the Financial Intelligence Summarizer. Implement these trades, considering market conditions, timing, and optimal execution strategies. Report back on execution status, actual trade prices, and any deviations from the recommendations.',
+                    description='Execute the trading recommendations provided by the Macro & Token Intelligence Synthesizer. DO NOT attempt to access any URLs directly - use only the information provided by the other agents. Implement these trades, considering market conditions, timing, and optimal execution strategies. Report back on execution status, actual trade prices, and any deviations from the recommendations.',
                     expected_output='Trade execution report with details on executed orders, prices, quantities, and execution quality',
                     agent=trade_executor,
                     async_execution=False

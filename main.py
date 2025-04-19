@@ -79,14 +79,12 @@ class ProvideInputRequest(BaseModel):
 class StartSuperRequest(BaseModel):
     identifier: str = "123123123123123"
     address: str = "addr1...."
-    payment_token: str = None  # Will use default if not provided
     
     class Config:
         json_schema_extra = {
             "example": {
                 "identifier": "unique_purchaser_id",
-                "address": "addr1q9fjd9ca0mz8va2r8755rsg8f0wrpxrplxmuywx4ky4stgxyq9zqacteq5u0d9j46alzkc4pp79m8sxeejhfu8r0lmeqcfvlfl",
-                "payment_token": "your_payment_token"
+                "address": "addr1q9fjd9ca0mz8va2r8755rsg8f0wrpxrplxmuywx4ky4stgxyq9zqacteq5u0d9j46alzkc4pp79m8sxeejhfu8r0lmeqcfvlfl"
             }
         }
 
@@ -592,16 +590,13 @@ async def start_super(data: StartSuperRequest, background_tasks: BackgroundTasks
         "result": None
     }
     
-    # Use the token from request or default
-    payment_token = data.payment_token or PAYMENT_TOKEN
-    
     # Launch the process in the background
     background_tasks.add_task(
         process_super_job, 
         job_id=job_id, 
         identifier=data.identifier, 
         taskInfo=taskInfo,
-        payment_token=payment_token
+        payment_token=PAYMENT_TOKEN
     )
     
     return {

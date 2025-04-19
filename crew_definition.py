@@ -88,9 +88,8 @@ CRITICAL INSTRUCTION: You must NOT generate fake content from pastebin URLs.
 - Declining trading volume"""
 
         portfolio_fallback = """The portfolio includes:
-- Cardano (12500 ADA, $7,625.00, -2.3%)
-- NMKR (850000 tokens, $854.25, -12.6%)
-- Total portfolio value: $8,479.25 (-3.5%)"""
+- Cardano (100 ADA, $60.00, -2.3%)
+- NMKR (9000 tokens, $5.80, -12.6%)"""
 
         crew = Crew(
             agents=[researcher, market_analyst, portfolio_analyst, summarizer, trade_executor],
@@ -108,8 +107,8 @@ CRITICAL INSTRUCTION: You must NOT generate fake content from pastebin URLs.
                     async_execution=False
                 ),
                 Task(
-                    description=f'Analyze the user\'s current portfolio from this URL: https://pastebin.com/raw/vvSmadNF. ONLY use this exact URL - do not try to access other websites. DO NOT invent or hallucinate data. If you encounter any errors accessing the URL, use ONLY this fallback data: {portfolio_fallback}. Evaluate NMKR exposure, overall portfolio risk, and potential impact of NMKR price movements on the portfolio. IMPORTANT: Base your analysis SOLELY on the provided wallet balance data - do not make assumptions about other holdings or external factors.',
-                    expected_output='Portfolio risk assessment regarding NMKR holdings with actionable recommendations based exclusively on provided wallet data',
+                    description=f'Analyze the portfolio using ONLY this data: {portfolio_fallback}. DO NOT attempt to access any URLs or external data sources. DO NOT invent or hallucinate data. DO NOT use any data provided as an argument to this crew job. Evaluate NMKR exposure, overall portfolio risk, and potential impact of NMKR price movements on the portfolio. IMPORTANT: Base your analysis SOLELY on the fallback portfolio data - do not make assumptions about other holdings or external factors.',
+                    expected_output='Portfolio risk assessment regarding NMKR holdings with actionable recommendations based exclusively on the fallback portfolio data',
                     agent=portfolio_analyst,
                     async_execution=False
                 ),

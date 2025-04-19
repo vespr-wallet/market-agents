@@ -58,7 +58,7 @@ config = Config(
 # ─────────────────────────────────────────────────────────────────────────────
 class StartJobRequest(BaseModel):
     identifier_from_purchaser: str
-    input_data: dict[str, str]
+    input_data: str
     
     class Config:
         json_schema_extra = {
@@ -95,7 +95,7 @@ async def execute_crew_task(input_data: str) -> str:
     """ Execute a CrewAI task with Research and Writing Agents """
     logger.info(f"Starting CrewAI task with input: {input_data}")
     crew = ResearchCrew(logger=logger)
-    result = crew.crew.kickoff(inputs={"text": input_data})
+    result = crew.crew.kickoff(inputs={"wallet_balance": input_data})
     logger.info("CrewAI task completed successfully")
     return result
 
@@ -112,7 +112,7 @@ async def start_job(data: StartJobRequest):
         agent_identifier = os.getenv("AGENT_IDENTIFIER")
         
         # Log the input text (truncate if too long)
-        input_text = data.input_data["text"]
+        input_text = data.input_data
         truncated_input = input_text[:100] + "..." if len(input_text) > 100 else input_text
         logger.info(f"Received job request with input: '{truncated_input}'")
         logger.info(f"Starting job {job_id} with agent {agent_identifier}")
@@ -130,7 +130,7 @@ async def start_job(data: StartJobRequest):
             #amounts=amounts,
             config=config,
             identifier_from_purchaser=data.identifier_from_purchaser,
-            input_data=data.input_data
+            input_data={"wallet_balance": data.input_data}
         )
         
         logger.info("Creating payment request...")
@@ -569,7 +569,7 @@ async def start_super(data: StartSuperRequest, background_tasks: BackgroundTasks
     """
 
     # todo use the data.address to fetch wallet balance
-    wallet_balance = "100 ADA, 100 NMKR"
+    wallet_balance = "100 ADA, 9000 NMKR"
 
     taskInfo = f"User portofolio consists of: {wallet_balance}" 
     job_id = str(uuid.uuid4())
@@ -636,9 +636,7 @@ async def process_super_job(job_id: str, identifier: str, taskInfo: str, payment
         
         start_job_data = {
             "identifier_from_purchaser": identifier,
-            "input_data": {
-                "text": taskInfo
-            }
+            "input_data": taskInfo,
         }
         
         # Make internal call to start_job using httpx

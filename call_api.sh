@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default values
-IDENTIFIER=${1:-"example_purchaser_123"}
+IDENTIFIER=${1:-"123123123123123"}
 TEXT=${2:-"Analyze these tweets about $NMKR cryptocurrency and provide a detailed sentiment analysis. Identify key complaints, potential red flags, and give your assessment on whether this appears to be a legitimate project facing challenges or potentially fraudulent."}
 OUTPUT_FILE=${3:-"response.json"}
 TOKEN=${4:-"iofsnaiojdoiewqajdriknjonasfoinasd"}
@@ -28,7 +28,7 @@ echo "$RESPONSE" > "$OUTPUT_FILE"
 echo "First API response stored in $OUTPUT_FILE"
 
 # Extract values from first response
-JOB_ID=$(echo "$RESPONSE" | jq -r '.job_id')
+JOB_ID=$(echo "$RESPONSE" | jq -r '.job_id')re
 BLOCKCHAIN_ID=$(echo "$RESPONSE" | jq -r '.blockchainIdentifier')
 SUBMIT_TIME=$(echo "$RESPONSE" | jq -r '.submitResultTime')
 UNLOCK_TIME=$(echo "$RESPONSE" | jq -r '.unlockTime')

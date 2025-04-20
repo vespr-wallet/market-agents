@@ -64,9 +64,7 @@ class StartJobRequest(BaseModel):
         json_schema_extra = {
             "example": {
                 "identifier_from_purchaser": "example_purchaser_123",
-                "input_data": {
-                    "text": "Write a story about a robot learning to paint"
-                }
+                "input_data": "User portofolio consists of: 100 ADA, 9000 NMKR"
             }
         }
 
@@ -279,19 +277,16 @@ async def input_schema():
     Returns the expected input schema for the /start_job endpoint.
     Fulfills MIP-003 /input_schema endpoint.
     """
+    
+    # return {
+    #     "identifier_from_purchaser": "example_purchaser_123",
+    #     "input_data": "User portofolio consists of: 100 ADA, 9000 NMKR"
+    # }
     return {
-        "input_data": [
-            {
-                "id": "text",
-                "type": "string",
-                "name": "Task Description",
-                "data": {
-                    "description": "The text input for the AI task",
-                    "placeholder": "Enter your task description here"
-                }
-            }
-        ]
+        "identifier_from_purchaser": "<string>",
+        "input_data": "<string>",
     }
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 6) Health Check
